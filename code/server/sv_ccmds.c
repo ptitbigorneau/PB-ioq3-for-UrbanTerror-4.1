@@ -2050,6 +2050,7 @@ void CmdsTest(void)
              fputs("infoban 4\n", fichier);
              fputs("gametype 4\n", fichier);
              fputs("exec 4\n", fichier);
+             fputs("superslap 4\n", fichier);
              fputs("unban 5\n", fichier);
              fputs("moon 5\n", fichier);
              fputs("gravity 5\n", fichier);
