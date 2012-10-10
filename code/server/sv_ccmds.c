@@ -1256,55 +1256,6 @@ static void SV_StopServerDemo_f(void)
 
 /*
 ==========
-SV_KillPlayer_f
-kill client
-==========
-*/
-
-static void SV_KillPlayer_f(void)
-{
-    client_t *cl;
-    char *cmd;
-    int clId;
-    playerState_t *ps;
-    int	cteam;
-	
-    // make sure server is running
-    if (!com_sv_running->integer)
-    {
-        Com_Printf("Server is not running.\n");
-        return;
-    }
-	
-    if (Cmd_Argc() < 2 )
-    {
-        Com_Printf("Usage: killplayer <player name>\n");
-        return;
-    }
-	
-    if (!(cl = SV_GetPlayerByHandle()))
-        return;
-
-    clId = cl - svs.clients;
-    ps = SV_GameClientNum( clId );
-    cteam = ps->persistant[PERS_TEAM];
-           
-    if (cteam == 3)
-    {
-        Com_Printf("%s ^7is in spectator\n", cl->name);
-        return;
-    }
-	
-	cmd = "kill";
-	Cmd_TokenizeString(cmd);
-    
-    SV_SendServerCommand(NULL, "cp \"%s ^7killed by Admin\"", cl->name);
-    
-    VM_Call(gvm, GAME_CLIENT_COMMAND, cl - svs.clients);
-}
-
-/*
-==========
 SV_PrivateBigtext_f
 Send a bigtext to private clients
 ==========
@@ -1379,6 +1330,55 @@ static void SV_Rename_f(void)
     return;
 }
 
+/*
+==========
+SV_KillPlayer_f
+kill client
+==========
+*/
+
+static void SV_KillPlayer_f(void)
+{
+    client_t *cl;
+    char *cmd;
+    int clId;
+    playerState_t *ps;
+    int	cteam;
+	
+    // make sure server is running
+    if (!com_sv_running->integer)
+    {
+        Com_Printf("Server is not running.\n");
+        return;
+    }
+	
+    if (Cmd_Argc() < 2 )
+    {
+        Com_Printf("Usage: killplayer <player name>\n");
+        return;
+    }
+	
+    if (!(cl = SV_GetPlayerByHandle()))
+        return;
+
+    clId = cl - svs.clients;
+    ps = SV_GameClientNum( clId );
+    cteam = ps->persistant[PERS_TEAM];
+           
+    if (cteam == 3)
+    {
+        Com_Printf("%s ^7is in spectator\n", cl->name);
+        return;
+    }
+	
+	cmd = "kill";
+	Cmd_TokenizeString(cmd);
+    
+    SV_SendServerCommand(NULL, "cp \"%s ^7killed by Admin\"", cl->name);
+    
+    VM_Call(gvm, GAME_CLIENT_COMMAND, cl - svs.clients);
+}
+
 //===========================================================
 
 /*
@@ -1422,6 +1422,8 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand ("privatebigtext", SV_PrivateBigtext_f);
 	Cmd_AddCommand ("pbigtext", SV_PrivateBigtext_f);
 	Cmd_AddCommand ("rename", SV_Rename_f);
+	Cmd_AddCommand ("killplayer", SV_KillPlayer_f);
+	Cmd_AddCommand ("killp", SV_KillPlayer_f)
 }
 
 /*
