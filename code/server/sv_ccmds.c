@@ -1303,7 +1303,44 @@ static void SV_KillPlayer_f(void)
     VM_Call(gvm, GAME_CLIENT_COMMAND, cl - svs.clients);
 }
 
+/*
+==========
+SV_PrivateBigtext_f
+Send a bigtext to private clients
+==========
+*/
 
+static void SV_PrivateBigtext_f(void)
+{
+    client_t *cl;
+    char *string;
+	
+    // make sure server is running
+    if (!com_sv_running->integer)
+    {
+        Com_Printf("Server is not running.\n");
+        return;
+    }
+	
+    if (Cmd_Argc() < 3 || strlen(Cmd_Argv(2)) == 0)
+    {
+        Com_Printf("Usage: privatebigtext <player number> <string>\n");
+        return;
+    }
+
+    
+
+    if (!(cl = SV_GetPlayerByHandle()))
+
+        return;
+
+	string = Cmd_ArgsFromRaw(2);
+	Cmd_TokenizeString(string);
+    
+    Com_Printf("PrivateBigtext %s: \"%s\"\n", cl->name, string);
+    SV_SendServerCommand(cl, "cp \"^3[PM]:^7 %s\"", string);
+
+}
 
 //===========================================================
 
@@ -1345,6 +1382,8 @@ void SV_AddOperatorCommands( void ) {
                 Cmd_AddCommand("startserverdemo", SV_StartServerDemo_f);
                 Cmd_AddCommand("stopserverdemo", SV_StopServerDemo_f);
 	}
+	Cmd_AddCommand ("privatebigtext", SV_PrivateBigtext_f);
+	Cmd_AddCommand ("pbigtext", SV_PrivateBigtext_f);
 }
 
 /*
