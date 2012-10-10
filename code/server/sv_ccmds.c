@@ -1423,7 +1423,7 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand ("pbigtext", SV_PrivateBigtext_f);
 	Cmd_AddCommand ("rename", SV_Rename_f);
 	Cmd_AddCommand ("killplayer", SV_KillPlayer_f);
-	Cmd_AddCommand ("killp", SV_KillPlayer_f)
+	Cmd_AddCommand ("killp", SV_KillPlayer_f);
 }
 
 /*
