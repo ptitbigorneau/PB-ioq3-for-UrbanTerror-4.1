@@ -1686,7 +1686,289 @@ int SQ_TestBan(client_t *cl, char *guid)
 
     return;
 }
+/*
+=================
+SV_Clientindatabase
+=================
+*/
 
+void SV_Clientindatabase(client_t *cl, char *type)
+{  
+        char *guid = Info_ValueForKey(cl->userinfo, "cl_guid");
+        char *ip = Info_ValueForKey(cl->userinfo, "ip");
+
+        ip = strtok(ip, ":");
+
+        SQ_TestDatabase_f();
+
+        SQ_ClientConnect(cl->name, guid, ip, type, NULL, NULL, NULL);
+
+        SQ_TestBan(cl, guid);
+
+        return;   
+}
+/*
+========================
+SV_ChangeGear_f
+========================
+*/
+static void SV_ChangeGears_f(char *cgear, char a, char b)
+{
+	char *src = cgear, *dst = cgear, c;
+	while ((c = *src)) {
+		if (c == a) {
+			*dst++ = b;
+		}
+                else {
+                  *dst++ = c;
+                }
+		src++;
+	}
+	*dst = '\0';
+}
+
+/*
+=================
+SV_ChangeGear
+=================
+*/
+void SV_ChangeGear(client_t *cl, char *gear)
+{   
+    char a;
+    char b; 
+    char ngear[32];
+
+    Q_strncpyz(ngear, gear, sizeof(ngear));
+    
+    if (!Q_stricmp(sv_nosmoke->string, "1")) {
+        a = 'Q';
+        b = 'A';
+    
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nogrenade->string, "1")) {
+        a = 'O';
+        b = 'A';
+     
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nog36->string, "1")) {
+        a = 'M';
+        b = 'L';
+     
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+  
+    if (!Q_stricmp(sv_nopsg->string, "1")) {
+        a = 'N';
+        b = 'L';
+    
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+    
+    if (!Q_stricmp(sv_nosr8->string, "1")) {
+        a = 'Z';
+        b = 'L';
+     
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nohk69->string, "1")) {
+        a = 'K';
+        b = 'L';
+     
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nonegev->string, "1")) {
+        a = 'c';
+        b = 'L';
+     
+        SV_ChangeGears_f(ngear, a, b);
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+    
+    if (!Q_stricmp(sv_notacgoggle->string, "1")) {
+        a = 'S';
+        b = 'A';
+     
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[4] ==  'A'){
+          if (ngear[5] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[5], 'A', ngear[6]);
+          }
+          else if (ngear[6] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[6], ngear[5], 'A');
+          }
+          else {
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], 'W', ngear[5], ngear[6]);
+          }
+          
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+       
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nokevlar->string, "1")) {
+        a = 'R';
+        b = 'A';
+
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[4] ==  'A'){
+          if (ngear[5] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[5], 'A', ngear[6]);
+          }
+          else if (ngear[6] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[6], ngear[5], 'A');
+          }
+          else {
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], 'W', ngear[5], ngear[6]);
+          }
+          
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nomedkit->string, "1")) {
+        a = 'T';
+        b = 'A';
+
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[4] ==  'A'){
+          if (ngear[5] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[5], 'A', ngear[6]);
+          }
+          else if (ngear[6] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[6], ngear[5], 'A');
+          }
+          else {
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], 'W', ngear[5], ngear[6]);
+          }
+          
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_noxtra->string, "1")) {
+        a = 'X';
+        b = 'A';
+
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[4] ==  'A'){
+          if (ngear[5] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[5], 'A', ngear[6]);
+          }
+          else if (ngear[6] != 'A'){
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], ngear[6], ngear[5], 'A');
+          }
+          else {
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], ngear[1], ngear[2], ngear[3], 'W', ngear[5], ngear[6]);
+          }
+          
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nospas->string, "1")) {
+        a = 'H';
+        b = 'A';
+
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[1] ==  'A'){
+
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], 'L', ngear[2], ngear[3], ngear[4], ngear[5], ngear[6]);
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_nomp5->string, "1")) {
+        a = 'I';
+        b = 'A';
+
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[1] ==  'A'){
+
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], 'L', ngear[2], ngear[3], ngear[4], ngear[5], ngear[6]);
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+
+    if (!Q_stricmp(sv_noump45->string, "1")) {
+        a = 'J';
+        b = 'A';
+
+        SV_ChangeGears_f(ngear, a, b);
+
+        if (ngear[1] ==  'A'){
+
+             sprintf( ngear, "%c%c%c%c%c%c%c", ngear[0], 'L', ngear[2], ngear[3], ngear[4], ngear[5], ngear[6]);
+        }
+
+        Info_SetValueForKey(cl->userinfo, "gear", ngear);
+        SV_UserinfoChanged(cl);
+
+        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    }
+    return;
+}
 /*
 ==================
 SV_SetLevel_f
@@ -5643,28 +5925,6 @@ void PB_Cinfoban(client_t *cl, char *arg)
 
        return;
 }
-/*
-=================
-SV_Clientindatabase
-=================
-*/
-
-void SV_Clientindatabase(client_t *cl, char *type)
-{  
-        char *guid = Info_ValueForKey(cl->userinfo, "cl_guid");
-        char *ip = Info_ValueForKey(cl->userinfo, "ip");
-
-        ip = strtok(ip, ":");
-
-        SQ_TestDatabase_f();
-
-        SQ_ClientConnect(cl->name, guid, ip, type, NULL, NULL, NULL);
-
-        SQ_TestBan(cl, guid);
-
-        return;   
-}
-
 
 //===========================================================
 

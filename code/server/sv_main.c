@@ -60,6 +60,21 @@ cvar_t  *sv_demofolder;
 
 cvar_t  *sv_nospacesinnicks;
 cvar_t  *sv_commands;
+
+cvar_t	*  sv_nosmoke;
+cvar_t	*  sv_nogrenade;
+cvar_t	*  sv_nog36;
+cvar_t	*  sv_nopsg;
+cvar_t	*  sv_nosr8;
+cvar_t	*  sv_nohk69;
+cvar_t	*  sv_notacgoggle;
+cvar_t	*  sv_nokevlar;
+cvar_t	*  sv_nomedkit;
+cvar_t	*  sv_noxtra;
+cvar_t	*  sv_nospas;
+cvar_t	*  sv_nonegev;
+cvar_t	*  sv_nomp5;
+cvar_t	*  sv_noump45;
 /*
 =============================================================================
 

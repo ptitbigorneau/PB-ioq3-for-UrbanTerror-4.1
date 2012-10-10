@@ -302,6 +302,21 @@ extern  cvar_t  *sv_demofolder;
 extern  cvar_t  *sv_nospacesinnicks;
 extern  cvar_t  *sv_commands;
 
+extern	cvar_t	*  sv_nosmoke;
+extern	cvar_t	*  sv_nogrenade;
+extern	cvar_t	*  sv_nog36;
+extern	cvar_t	*  sv_nopsg;
+extern	cvar_t	*  sv_nosr8;
+extern	cvar_t	*  sv_nohk69;
+extern	cvar_t	*  sv_notacgoggle;
+extern	cvar_t	*  sv_nokevlar;
+extern	cvar_t	*  sv_nomedkit;
+extern	cvar_t	*  sv_noxtra;
+extern	cvar_t	*  sv_nospas;
+extern	cvar_t	*  sv_nonegev;
+extern	cvar_t	*  sv_nomp5;
+extern	cvar_t	*  sv_noump45;
+
 //===========================================================
 
 //

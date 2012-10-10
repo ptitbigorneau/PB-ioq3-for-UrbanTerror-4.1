@@ -690,6 +690,21 @@ void SV_Init (void) {
 	sv_nospacesinnicks = Cvar_Get("sv_nospacesinnicks", "0", CVAR_ARCHIVE);
 	sv_commands = Cvar_Get("sv_commands", "0", CVAR_ARCHIVE);
 
+	sv_nosmoke = Cvar_Get ("sv_nosmoke", "0", CVAR_ARCHIVE );
+	sv_nogrenade = Cvar_Get ("sv_nogrenade", "0", CVAR_ARCHIVE );
+	sv_nog36 = Cvar_Get ("sv_nog36", "0", CVAR_ARCHIVE );        
+	sv_nopsg = Cvar_Get ("sv_nopsg", "0", CVAR_ARCHIVE );
+	sv_nosr8 = Cvar_Get ("sv_nosr8", "0", CVAR_ARCHIVE );
+	sv_nohk69 = Cvar_Get ("sv_nohk69", "0", CVAR_ARCHIVE );
+	sv_notacgoggle = Cvar_Get ("sv_notacgoggle", "0", CVAR_ARCHIVE );
+	sv_nokevlar = Cvar_Get ("sv_nokevlar", "0", CVAR_ARCHIVE );
+	sv_nomedkit = Cvar_Get ("sv_nomedkit", "0", CVAR_ARCHIVE );
+	sv_noxtra = Cvar_Get ("sv_noxtra", "0", CVAR_ARCHIVE );
+	sv_nospas = Cvar_Get ("sv_nospas", "0", CVAR_ARCHIVE );
+	sv_nonegev = Cvar_Get ("sv_nonegev", "0", CVAR_ARCHIVE );
+	sv_nomp5 = Cvar_Get ("sv_nomp5", "0", CVAR_ARCHIVE );
+	sv_noump45 = Cvar_Get ("sv_noump45", "0", CVAR_ARCHIVE );
+
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
 

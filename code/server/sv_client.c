@@ -186,6 +186,7 @@ void SV_DirectConnect( netadr_t from ) {
 	int			count;
 	char		*ip;
 	char		*c;
+	char		*gear;
 
 	Com_DPrintf ("SVC_DirectConnect ()\n");
 
@@ -418,6 +419,10 @@ gotnewcl:
 	if ( count == 1 || count == sv_maxclients->integer ) {
 		SV_Heartbeat_f();
 	}
+
+	gear = Info_ValueForKey(newcl->userinfo, "gear");
+
+	SV_ChangeGear(newcl, gear);
 
 	if ((c = strpbrk(newcl->name, " ")!= NULL) || (c = strpbrk(newcl->name, "/")!= NULL))
 	{     
@@ -1231,7 +1236,12 @@ void SV_UpdateUserinfo_f( client_t *cl ) {
 	// call prog code to allow overrides
 	VM_Call( gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients );
 
-	char            *c;
+
+	char 		*c;
+	char		*gear;
+
+	gear = Info_ValueForKey(cl->userinfo, "gear");
+	SV_ChangeGear(cl, gear);
 
 	if ((c = strpbrk(cl->name, " ")!= NULL) || (c = strpbrk(cl->name, "/")!= NULL))
 	{     
