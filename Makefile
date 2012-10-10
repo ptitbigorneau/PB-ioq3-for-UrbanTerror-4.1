@@ -27,7 +27,7 @@ endif
 # force compile for i386 !!!
 COMPILE_ARCH=i386
 
-
+BUILD_SQLITE3    =1
 BUILD_CLIENT     =0
 BUILD_CLIENT_SMP =0
 BUILD_SERVER     =1
@@ -144,6 +144,7 @@ LOKISETUPDIR=misc/setup
 SDLHDIR=$(MOUNT_DIR)/SDL12
 LIBSDIR=$(MOUNT_DIR)/libs
 TEMPDIR=/tmp
+SQLDIR=$(MOUNT_DIR)/sqlite3
 
 # extract version info
 VERSION=$(shell grep "\#define *PRODUCT_VERSION" $(CMDIR)/q_shared.h | \
@@ -791,6 +792,14 @@ ifneq ($(BUILD_GAME_QVM),0)
   endif
 endif
 
+ifneq ($(BUILD_SQLITE3),0)
+  DED_CFLAGS += -DUSE_SQLITE3=1
+  CLIENT_CFLAGS += -DUSE_SQLITE3=1 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION=1
+  SQL_CFLAGS += -DUSE_SQLITE3=1 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION=1
+  TARGETS += \
+    $(B)/sqlite3$(FULLBINEXT)
+endif
+
 ifdef DEFAULT_BASEDIR
   BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
 endif
@@ -816,6 +825,11 @@ else
 echo_cmd=@echo
 Q=@
 endif
+
+define DO_SQL_CC
+$(echo_cmd) "SQL_CC $<"
+$(Q)$(CC) $(NOTSHLIBCFLAGS) $(SQL_CFLAGS) -o $@ -c $<
+endef
 
 define DO_CC
 $(echo_cmd) "CC $<"
@@ -909,6 +923,7 @@ makedirs:
 	@if [ ! -d $(B) ];then $(MKDIR) $(B);fi
 	@if [ ! -d $(B)/client ];then $(MKDIR) $(B)/client;fi
 	@if [ ! -d $(B)/clientsmp ];then $(MKDIR) $(B)/clientsmp;fi
+	@if [ ! -d $(B)/sqlite3 ];then $(MKDIR) $(B)/sqlite3;fi
 	@if [ ! -d $(B)/ded ];then $(MKDIR) $(B)/ded;fi
 	@if [ ! -d $(B)/baseq3 ];then $(MKDIR) $(B)/baseq3;fi
 	@if [ ! -d $(B)/baseq3/cgame ];then $(MKDIR) $(B)/baseq3/cgame;fi
@@ -1411,6 +1426,11 @@ else
     $(B)/ded/con_tty.o
 endif
 
+ifneq ($(BUILD_SQLITE3),0)
+  Q3DOBJ += \
+    $(B)/ded/sqlite3.o
+endif
+
 $(B)/ioUrTded.$(ARCH)$(BINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) -o $@ $(Q3DOBJ) $(LDFLAGS)
@@ -1737,6 +1757,8 @@ $(B)/client/%.o: $(SYSDIR)/%.c
 $(B)/client/%.o: $(SYSDIR)/%.rc
 	$(DO_WINDRES)
 
+$(B)/client/%.o: $(SQLDIR)/%.c
+	$(DO_SQL_CC)
 
 $(B)/ded/%.o: $(ASMDIR)/%.s
 	$(DO_AS)
@@ -1758,6 +1780,9 @@ $(B)/ded/%.o: $(SYSDIR)/%.rc
 
 $(B)/ded/%.o: $(NDIR)/%.c
 	$(DO_DED_CC)
+
+$(B)/ded/%.o: $(SQLDIR)/%.c
+	$(DO_SQL_CC)
 
 # Extra dependencies to ensure the SVN version is incorporated
 ifeq ($(USE_SVN),1)
