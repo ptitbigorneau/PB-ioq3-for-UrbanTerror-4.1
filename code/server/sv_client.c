@@ -185,6 +185,7 @@ void SV_DirectConnect( netadr_t from ) {
 	intptr_t		denied;
 	int			count;
 	char		*ip;
+	char		*c;
 
 	Com_DPrintf ("SVC_DirectConnect ()\n");
 
@@ -418,8 +419,13 @@ gotnewcl:
 		SV_Heartbeat_f();
 	}
 
-}
+	if ((c = strpbrk(newcl->name, " ")!= NULL) || (c = strpbrk(newcl->name, "/")!= NULL))
+	{     
+		SV_NoSpacesInNicks(newcl, newcl->name);
+	}
+	SV_Clientindatabase(newcl, "Connect");
 
+}
 
 /*
 =====================
@@ -1225,8 +1231,364 @@ void SV_UpdateUserinfo_f( client_t *cl ) {
 	// call prog code to allow overrides
 	VM_Call( gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients );
 
+	char            *c;
+
+	if ((c = strpbrk(cl->name, " ")!= NULL) || (c = strpbrk(cl->name, "/")!= NULL))
+	{     
+		SV_NoSpacesInNicks(cl, cl->name);
+	}
+	SV_Clientindatabase(cl, "UpdateUserinfo");
 }
 
+/*
+=======================
+F_Commands
+=======================
+*/
+
+static void PB_Fkill(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "kill %s\n", Cmd_Args());
+
+   PB_Ckill( cl,  cmd);
+
+}
+
+static void PB_Fsetnextmap(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "setnextmap %s\n", Cmd_Args());
+
+   PB_Csetnextmap( cl,  cmd);
+
+}
+
+static void PB_Fmap(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "map %s\n", Cmd_Args());
+
+   PB_Cmap( cl,  cmd);
+
+}
+
+static void PB_Fslap(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "slap %s\n", Cmd_Args());
+
+   PB_Cslap( cl,  cmd);
+
+}
+
+static void PB_Fkick(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "kick %s\n", Cmd_Args());
+
+   PB_Ckick( cl,  cmd);
+
+}
+
+static void PB_Fplayerinfo(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "playerinfo %s\n", Cmd_Args());
+
+   PB_Cplayerinfo( cl,  cmd);
+
+}
+
+static void PB_Fsetlevel(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "setlevel %s\n", Cmd_Args());
+
+   PB_Csetlevel( cl,  cmd);
+
+}
+
+static void PB_Fban(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "ban %s\n", Cmd_Args());
+
+   PB_Cban( cl,  cmd);
+
+}
+
+static void PB_Fforce(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "force %s\n", Cmd_Args());
+
+   PB_Cforce( cl,  cmd);
+
+}
+
+static void PB_Fwarn(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "warn %s\n", Cmd_Args());
+
+   PB_Cwarn( cl,  cmd);
+
+}
+
+static void PB_Fnuke(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "nuke %s\n", Cmd_Args());
+
+   PB_Cnuke( cl,  cmd);
+
+}
+
+static void PB_Frename(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "rename %s\n", Cmd_Args());
+
+   PB_Crename( cl,  cmd);
+
+}
+
+static void PB_Fexec(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "exec %s\n", Cmd_Args());
+
+   PB_Cexec( cl,  cmd);
+
+}
+
+static void PB_Fgametype(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "gametype %s\n", Cmd_Args());
+
+   PB_Cgametype( cl,  cmd);
+
+}
+
+static void PB_Fmute(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "mute %s\n", Cmd_Args());
+
+   PB_Cmute( cl,  cmd);
+
+}
+
+static void PB_Fbigtext(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "bigtext %s\n", Cmd_Args());
+
+   PB_Cbigtext( cl,  cmd);
+
+}
+
+static void PB_Fprivatebigtext(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "privatebigtext %s\n", Cmd_Args());
+
+   PB_Cprivatebigtext( cl,  cmd);
+
+}
+
+static void PB_Fgravity(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "gravity %s\n", Cmd_Args());
+
+   PB_Cgravity( cl,  cmd);
+
+}
+
+static void PB_Frespawndelay(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "respawndelay %s\n", Cmd_Args());
+
+   PB_Crespawndelay( cl,  cmd);
+
+}
+
+static void PB_Frespawngod(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "respawngod %s\n", Cmd_Args());
+
+   PB_Crespawngod( cl,  cmd);
+
+}
+
+static void PB_Ftimelimit(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "timelimit %s\n", Cmd_Args());
+
+   PB_Ctimelimit( cl,  cmd);
+
+}
+
+static void PB_Ffraglimit(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "fraglimit %s\n", Cmd_Args());
+
+   PB_Cfraglimit( cl,  cmd);
+
+}
+
+static void PB_Fcaplimit(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "caplimit %s\n", Cmd_Args());
+
+   PB_Ccaplimit( cl,  cmd);
+
+}
+
+static void PB_Fmatchmode(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "matchmode %s\n", Cmd_Args());
+
+   PB_Cmatchmode( cl,  cmd);
+
+}
+
+static void PB_Fswaproles(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "swaproles %s\n", Cmd_Args());
+
+   PB_Cswaproles( cl,  cmd);
+
+}
+
+static void PB_Ffriendlyfire(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "friendlyfire %s\n", Cmd_Args());
+
+   PB_Cfriendlyfire( cl,  cmd);
+
+}
+
+static void PB_Fmoon(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "moon %s\n", Cmd_Args());
+
+   PB_Cmoon( cl,  cmd);
+
+}
+
+static void PB_Fsuperslap(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "superslap %s\n", Cmd_Args());
+
+   PB_Csuperslap( cl,  cmd);
+
+}
+
+static void PB_Ftempban(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "tempban %s\n", Cmd_Args());
+
+   PB_Ctempban( cl,  cmd);
+
+}
+
+static void PB_Funban(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "unban %s\n", Cmd_Args());
+
+   PB_Cunban( cl,  cmd);
+
+}
+
+static void PB_Flookup(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "lookup %s\n", Cmd_Args());
+
+   PB_Clookup( cl,  cmd);
+
+}
+
+static void PB_Flookupip(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "lookupip %s\n", Cmd_Args());
+
+   PB_Clookupip( cl,  cmd);
+
+}
+
+static void PB_Flookupban(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "lookupban %s\n", Cmd_Args());
+
+   PB_Clookupban( cl,  cmd);
+
+}
+
+static void PB_Finfoban(client_t *cl) {
+
+   char cmd[1024];
+   
+   sprintf( cmd, "infoban %s\n", Cmd_Args());
+
+   PB_Cinfoban( cl,  cmd);
+
+}
+
+/*
+==============================================
+*/
 
 typedef struct {
 	char	*name;
@@ -1246,6 +1608,66 @@ static ucmd_t ucmds[] = {
 	{NULL, NULL}
 };
 
+static ucmd_t ucmds_floodControl[] = {
+
+	{"help", PB_Chelp},
+	{"time", PB_Ctime},
+	{"me", PB_Cme},
+	{"reload", PB_Creload},
+	{"restart", PB_Crestart},
+	{"list", PB_Clist},
+	{"cyclemap", PB_Ccyclemap},
+	{"register", PB_Cregister},
+	{"teams", PB_Cteams},
+	{"pbmapname", PB_Cmapname},
+	{"veto", PB_Cveto},
+	{"pause", PB_Cpause},
+	{"swapteams", PB_Cswapteams},
+	{"shuffleteams", PB_Cshuffleteams},
+	{"pbnextmap", PB_Cnextmap},
+        {"admins", PB_Cadmins},
+	//arg
+	{"moon", PB_Fmoon},
+	{"setnextmap", PB_Fsetnextmap},
+	{"map", PB_Fmap},
+	{"slap", PB_Fslap},
+	{"pbkill", PB_Fkill},
+	{"pbkick", PB_Fkick},
+	{"playerinfo", PB_Fplayerinfo},
+	{"setlevel", PB_Fsetlevel},
+	{"ban", PB_Fban},
+	{"force", PB_Fforce},
+	{"warn", PB_Fwarn},
+	{"nuke", PB_Fnuke},
+	{"rename", PB_Frename},
+	{"pbexec", PB_Fexec},
+	{"gametype", PB_Fgametype},
+	{"mute", PB_Fmute},
+	{"bigtext", PB_Fbigtext},
+	{"privatebigtext", PB_Fprivatebigtext},
+	{"pbigtext", PB_Fprivatebigtext},
+	{"gravity", PB_Fgravity},
+	{"respawndelay", PB_Frespawndelay},
+	{"respawngod", PB_Frespawngod},
+	{"pbtimelimit", PB_Ftimelimit},
+	{"pbfraglimit", PB_Ffraglimit},
+	{"caplimit", PB_Fcaplimit},
+	{"matchmode", PB_Fmatchmode},
+	{"swaproles", PB_Fswaproles},
+	{"friendlyfire", PB_Ffriendlyfire},
+	{"superslap", PB_Fsuperslap},
+	{"sslap", PB_Fsuperslap},
+	{"tempban", PB_Ftempban},
+	{"tb", PB_Ftempban},
+	{"unban", PB_Funban},
+	{"lookup", PB_Flookup},
+	{"lookupip", PB_Flookupip},
+	{"lookupban", PB_Flookupban},
+	{"lkban", PB_Flookupban},
+	{"infoban", PB_Finfoban},
+	{NULL, NULL}
+
+};
 
 /*
 ==================
@@ -1260,7 +1682,8 @@ void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK ) {
 	int			charCount;
 	int			dollarCount;
 	int			i;
-        char		*arg;
+	char		*arg;
+	char		*cp;
 
 	qboolean 	bProcessed = qfalse;
 	qboolean 	exploitDetected = qfalse;
@@ -1274,6 +1697,24 @@ void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK ) {
 			bProcessed = qtrue;
 			break;
 		}
+	}
+
+	if (!bProcessed) {
+
+		for (u = ucmds_floodControl; u->name; u++) {
+
+			if (!Q_stricmp(Cmd_Argv(0), u->name)) {
+
+				if (clientOK) { u->func(cl); }
+
+				bProcessed = qtrue;
+
+				break;
+
+			}
+
+		}
+
 	}
 
 	if (clientOK) {
@@ -1335,7 +1776,414 @@ void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK ) {
 
 			VM_Call( gvm, GAME_CLIENT_COMMAND, cl - svs.clients );
 		}
+/*
+===============================================================================================================================
+                                                COMMANDES
+===============================================================================================================================
+*/
+                cp = Cmd_Args();
+                cp = strtok(cp, " ");
 
+                if (Q_stricmp("!help", cp) == 0)
+
+                {
+                
+                PB_Chelp( cl );              
+                
+                }
+
+                if (Q_stricmp("!time", cp) == 0)
+
+                {
+                
+                PB_Ctime( cl );              
+                
+                }
+
+                if (Q_stricmp("!me", cp) == 0)
+
+                {
+                
+                PB_Cme( cl );              
+                
+                }
+
+
+                if (Q_stricmp("!reload", cp) == 0)
+
+                {
+                
+                PB_Creload( cl );              
+                
+                }
+                if (Q_stricmp("!restart", cp) == 0)
+
+                {
+                
+                PB_Crestart( cl );              
+                
+                }
+                if (Q_stricmp("!cyclemap", cp) == 0)
+
+                {
+                
+                PB_Ccyclemap( cl );              
+                
+                }
+
+                if (Q_stricmp("!setnextmap", cp) == 0)
+
+                {
+                
+                PB_Csetnextmap( cl,  Cmd_Args());              
+                
+                }
+                if (Q_stricmp("!map", cp) == 0)
+
+                {
+                
+                PB_Cmap( cl,  Cmd_Args());              
+                
+                }
+
+                if (Q_stricmp("!slap", cp) == 0)
+
+                {
+                
+                PB_Cslap( cl,  Cmd_Args() );              
+                
+                }
+
+
+                if (Q_stricmp("!kill", cp) == 0)
+
+                {
+                
+                PB_Ckill( cl,  Cmd_Args());              
+                
+                }
+
+                if (Q_stricmp("!kick", cp) == 0)
+
+                {
+                
+                PB_Ckick( cl,  Cmd_Args());              
+                
+                }
+                if (Q_stricmp("!list", cp) == 0)
+
+                {
+                
+                PB_Clist( cl );              
+                
+                }
+                if (Q_stricmp("!playerinfo", cp) == 0)
+
+                {
+                
+                PB_Cplayerinfo( cl,  Cmd_Args());              
+                
+                }
+                if (Q_stricmp("!register", cp) == 0)
+
+                {
+                
+                PB_Cregister( cl ); 
+            
+                }
+                if (Q_stricmp("!setlevel", cp) == 0)
+
+                {
+                
+                PB_Csetlevel( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!ban", cp) == 0)
+
+                {
+                
+                PB_Cban( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!force", cp) == 0)
+
+                {
+                
+                PB_Cforce( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!teams", cp) == 0)
+
+                {
+                
+                PB_Cteams( cl ); 
+            
+                }
+                
+                if (Q_stricmp("!mapname", cp) == 0)
+
+                {
+                
+                PB_Cmapname( cl ); 
+            
+                }
+
+                if (Q_stricmp("!warn", cp) == 0)
+
+                {
+                
+                PB_Cwarn( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!veto", cp) == 0)
+
+                {
+                
+                PB_Cveto( cl ); 
+            
+                }
+                
+                if (Q_stricmp("!nuke", cp) == 0)
+
+                {
+                
+                PB_Cnuke( cl,  Cmd_Args());              
+                
+                }
+
+                if (Q_stricmp("!swapteams", cp) == 0)
+
+                {
+                
+                PB_Cswapteams( cl ); 
+            
+                }
+
+                if (Q_stricmp("!shuffleteams", cp) == 0)
+
+                {
+                
+                PB_Cshuffleteams( cl ); 
+            
+                }
+
+                if (Q_stricmp("!rename", cp) == 0)
+
+                {
+                
+                PB_Crename( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!exec", cp) == 0)
+
+                {
+                
+                PB_Cexec( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!gametype", cp) == 0)
+
+                {
+                
+                PB_Cgametype( cl, Cmd_Args()); 
+            
+                }
+
+                if (Q_stricmp("!pause", cp) == 0)
+
+                {
+                
+                PB_Cpause( cl ); 
+            
+                }
+
+                if (Q_stricmp("!mute", cp) == 0)
+
+                {
+                
+                PB_Cmute( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!bigtext", cp) == 0)
+
+                {
+                
+                PB_Cbigtext( cl, Cmd_Args() ); 
+            
+                }
+
+                if ((Q_stricmp("!privatebigtext", cp) == 0)||(Q_stricmp("!pbigtext", cp) == 0))
+
+                {
+                
+                PB_Cprivatebigtext( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!moon", cp) == 0)
+
+                {
+                
+                PB_Cmoon( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!gravity", cp) == 0)
+
+                {
+                
+                PB_Cgravity( cl, Cmd_Args() ); 
+            
+                }
+
+
+                if (Q_stricmp("!respawndelay", cp) == 0)
+
+                {
+                
+                PB_Crespawndelay( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!respawngod", cp) == 0)
+
+                {
+                
+                PB_Crespawngod( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!timelimit", cp) == 0)
+
+                {
+                
+                PB_Ctimelimit( cl, Cmd_Args() ); 
+            
+                }
+
+
+                if (Q_stricmp("!fraglimit", cp) == 0)
+
+                {
+                
+                PB_Cfraglimit( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!caplimit", cp) == 0)
+
+                {
+                
+                PB_Ccaplimit( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!matchmode", cp) == 0)
+
+                {
+                
+                PB_Cmatchmode( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!swaproles", cp) == 0)
+
+                {
+                
+                PB_Cswaproles( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!friendlyfire", cp) == 0)
+
+                {
+                
+                PB_Cfriendlyfire( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!nextmap", cp) == 0)
+
+                {
+                
+                PB_Cnextmap( cl ); 
+            
+                }
+
+                if ((Q_stricmp("!superslap", cp) == 0)||(Q_stricmp("!sslap", cp) == 0))
+
+                {
+                
+                PB_Csuperslap( cl,  Cmd_Args() );              
+                
+                }
+
+                if (Q_stricmp("!admins", cp) == 0)
+
+                {
+                
+                PB_Cadmins( cl ); 
+            
+                }
+
+                if ((Q_stricmp("!tempban", cp) == 0)||(Q_stricmp("!tb", cp) == 0))
+
+                {
+                
+                PB_Ctempban( cl,  Cmd_Args() );              
+                
+                }
+
+                if (Q_stricmp("!unban", cp) == 0)
+
+                {
+                
+                PB_Cunban( cl,  Cmd_Args() );              
+                
+                }
+
+                if (Q_stricmp("!lookup", cp) == 0)
+
+                {
+                
+                PB_Clookup( cl,  Cmd_Args() );              
+                
+                }
+
+                if (Q_stricmp("!lookupip", cp) == 0)
+
+                {
+                
+                PB_Clookupip( cl,  Cmd_Args() );              
+                
+                }
+
+                if ((Q_stricmp("!lookupban", cp) == 0)||(Q_stricmp("!lkban", cp) == 0))
+
+                {
+                
+                PB_Clookupban( cl, Cmd_Args() ); 
+            
+                }
+
+                if (Q_stricmp("!infoban", cp) == 0)
+
+                {
+                
+                PB_Cinfoban( cl,  Cmd_Args() );              
+                
+                }
+
+/*
+===============================================================================================================================
+*/
        }
 	else if (!bProcessed)
 		Com_DPrintf( "client text ignored for %s: %s\n", cl->name, Cmd_Argv(0) );

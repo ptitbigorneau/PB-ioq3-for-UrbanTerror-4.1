@@ -58,6 +58,8 @@ cvar_t	*sv_sayprefix;
 cvar_t  *sv_demonotice;    // notice to print to a client being recorded server-side
 cvar_t  *sv_demofolder;
 
+cvar_t  *sv_nospacesinnicks;
+cvar_t  *sv_commands;
 /*
 =============================================================================
 

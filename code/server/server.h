@@ -299,6 +299,9 @@ extern	cvar_t	*sv_sayprefix;
 extern  cvar_t  *sv_demonotice;
 extern  cvar_t  *sv_demofolder;
 
+extern  cvar_t  *sv_nospacesinnicks;
+extern  cvar_t  *sv_commands;
+
 //===========================================================
 
 //
@@ -358,6 +361,67 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg );
 //
 void SV_Heartbeat_f( void );
 void SVD_WriteDemoFile(const client_t*, const msg_t*);
+
+void SV_NoSpacesInNicks(client_t *cl, char *name);
+void SV_ChangeGear(client_t *cl, char *gear);
+
+int TestAdmin(char *adminpath, char *guid);
+void PB_Creload (client_t *cl);
+void PB_Ctime (client_t *cl);
+void PB_Cme (client_t *cl);
+void PB_Crestart (client_t *cl);
+void PB_Ccyclemap (client_t *cl);
+void PB_Cmap (client_t *cl, char *arg);
+void PB_Cslap (client_t *cl, char *arg);
+void PB_Ckill (client_t *cl, char *arg);
+void PB_Ckick (client_t *cl, char *arg);
+void PB_Csetnextmap (client_t *cl, char *arg);
+void PB_Clist(client_t *cl);
+void PB_Chelp(client_t *cl);
+void PB_Cregister(client_t *cl);
+void PB_Cplayerinfo (client_t *cl, char *arg);
+void PB_Csetlevel(client_t *cl, char *arg);
+void PB_Cban(client_t *cl, char *arg);
+void PB_Cforce(client_t *cl, char *arg);
+void PB_Cteams(client_t *cl);
+void PB_Cmapname(client_t *cl);
+void PB_Cwarn(client_t *cl, char *arg);
+void PB_Cveto(client_t *cl);
+void PB_Cnuke (client_t *cl, char *arg);
+void PB_Cswapteams(client_t *cl);
+void PB_Cshuffleteams(client_t *cl);
+void PB_Cpause(client_t *cl);
+void PB_Crename (client_t *cl, char *arg);
+void PB_Cmute (client_t *cl, char *arg);
+void PB_Cexec (client_t *cl, char *arg);
+void PB_Cgametype (client_t *cl, char *arg);
+void PB_Cbigtext (client_t *cl, char *arg);
+void PB_Cprivatebigtext (client_t *cl, char *arg);
+void PB_Cmoon(client_t *cl, char *arg);
+void PB_Cgravity(client_t *cl, char *arg);
+void PB_Crespawndelay(client_t *cl, char *arg);
+void PB_Crespawngod(client_t *cl, char *arg);
+void PB_Ctimelimit(client_t *cl, char *arg);
+void PB_Cfraglimit(client_t *cl, char *arg);
+void PB_Ccaplimit(client_t *cl, char *arg);
+void PB_Cmatchmode(client_t *cl, char *arg);
+void PB_Cswaproles(client_t *cl, char *arg);
+void PB_Cfriendlyfire(client_t *cl, char *arg);
+int TestLevel(char *command);
+void CmdsTest(void);
+int TestAdminLevel(char *guid, char *name, int clevel, char *resultat);
+int TestGuid(char *guid, char *ip, char *name , char *admin, char *resultat);
+void PB_Cnextmap(client_t *cl);
+void PB_Csuperslap (client_t *cl, char *arg);
+void PB_Cadmins(client_t *cl);
+void PB_Csuperslap(client_t *cl, char *arg);
+void PB_Ctempban(client_t *cl, char *arg);
+void PB_Cunban(client_t *cl, char *arg);
+void PB_Clookup(client_t *cl, char *arg);
+void PB_Clookupip(client_t *cl, char *arg);
+void PB_Clookupban(client_t *cl, char *arg);
+void PB_Cinfoban(client_t *cl, char *arg);
+void SV_Clientindatabase(client_t *cl, char *type);
 
 //
 // sv_snapshot.c
