@@ -2118,7 +2118,6 @@ static void SV_SetLevel_f(void)
 
 }
 
-
 /*
 ===================================================================================================================
                                                     COMMANDES
@@ -2427,10 +2426,8 @@ void PB_Cme (client_t *cl) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        int      clientlevel;
-       char     *playerlevel;
        char     *playeraka;
        char	*playerip;
-       char	*playerguid;
        char	*playerconnection;
        char	*playerdate;
        int      playerid;
@@ -2473,7 +2470,7 @@ void PB_Cme (client_t *cl) {
                 }
 
               SV_SendServerCommand(cl, "chat \"^3IP: ^7%s ^3Guid: ^7%s\"", playerip, cguid);
-              SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mon, t->tm_mday, 1900 + t->tm_year, playerconnection);
+              SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mday, t->tm_mon, 1900 + t->tm_year, playerconnection);
   
        }
 
@@ -2632,7 +2629,6 @@ void PB_Chelp (client_t *cl) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        char     *clientlevel;
-       int      tlevel;
        clevel = TestLevel("help");
 
        if (clevel == -1){clevel = 0;}
@@ -3103,7 +3099,7 @@ void PB_Cplayerinfo (client_t *cl, char *arg) {
              }
 
              SV_SendServerCommand(cl, "chat \"^3IP: ^7%s ^3Guid: ^7%s\"", playerip, playerguid);
-             SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mon, t->tm_mday, 1900 + t->tm_year, playerconnection);
+             SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mday, t->tm_mon, 1900 + t->tm_year, playerconnection);
 
            }
           else 
@@ -3175,6 +3171,7 @@ void PB_Csetlevel(client_t *cl, char *arg)
        char	*clientip;
        char	*clientname;
        int      clientid;
+       char     *dtest = NULL;       
 
        clevel = TestLevel("setlevel");
 
@@ -3219,11 +3216,13 @@ void PB_Csetlevel(client_t *cl, char *arg)
                guid = SQ_TestClientID(clientid);
                clientip = SQ_TestClient(guid, "IP");
                clientname = SQ_TestClient(guid, "Name");
+               dtest = "id";
               
            }
            else
            {
                 client = SV_GetPlayerByHandle();
+                dtest = "client";
 
                 if (client) 
                 {
@@ -3248,7 +3247,7 @@ void PB_Csetlevel(client_t *cl, char *arg)
                SQ_ClientConnect(clientname, guid, clientip, type, newlevel, clientname, NULL);
                
                SV_SendServerCommand(cl, "chat \"^2Server^3[PM]^2: ^7You have put %s ^7at level (^1%i^7)\"", clientname, newlevel);
-               if (client){
+               if (dtest == "client"){
                    SV_SendServerCommand(client, "chat \"^2Server^3[PM]^2: ^7%s ^7just put you at level (^1%i^7)\"", cl->name, newlevel);
                }
            }
@@ -3273,13 +3272,12 @@ void PB_Cban(client_t *cl, char *arg)
        char	cmd[64];
        int      clId;
        int	clevel;
-       char	*test = NULL;
        int      clientlevel;
        char     *type = "Ban";
        char	*clientip;
        char	*clientname;
        int      clientid;
-
+       char     *etest = NULL;
        client_t *client;
 
        clevel = TestLevel("ban");
@@ -3319,10 +3317,12 @@ void PB_Cban(client_t *cl, char *arg)
                guid = SQ_TestClientID(clientid);
                clientip = SQ_TestClient(guid, "IP");
                clientname = SQ_TestClient(guid, "Name");
+               etest = "id";
            }
            else
            {
                 client = SV_GetPlayerByHandle();
+                etest = "client";
 
                 if (client) 
                 {
@@ -3351,7 +3351,7 @@ void PB_Cban(client_t *cl, char *arg)
               Com_sprintf(cmd, sizeof(cmd), "addip %s\n", clientip);
               Cmd_ExecuteString(cmd);                  
 
-              if (client) {
+              if (etest == "client") {
                  clId = client - svs.clients;
                  Com_sprintf(cmd, sizeof(cmd), "kick %i \"You have been banned by %s\"\n", clId, cl->name);
                  Cmd_ExecuteString(cmd);
@@ -3390,6 +3390,7 @@ void PB_Ctempban(client_t *cl, char *arg)
        char	*clientname;
        int      clientid;
        client_t *client;
+       char *ctest = NULL;
 
        clevel = TestLevel("tempban");
 
@@ -3428,10 +3429,12 @@ void PB_Ctempban(client_t *cl, char *arg)
                guid = SQ_TestClientID(clientid);
                clientip = SQ_TestClient(guid, "IP");
                clientname = SQ_TestClient(guid, "Name");
+               ctest = "id";
            }
            else
            {
                 client = SV_GetPlayerByHandle();
+                ctest = "client";
 
                 if (client) 
                 {
@@ -3464,7 +3467,6 @@ void PB_Ctempban(client_t *cl, char *arg)
                  return;
               }
 
-              struct tm * t;
               time_t timesban;
               timesban = time(NULL) + duration;
               ban = (int) timesban;
@@ -3472,12 +3474,15 @@ void PB_Ctempban(client_t *cl, char *arg)
               SQ_ClientConnect("", guid, clientip, type, "", "", ban);
 
               SV_SendServerCommand(NULL, "chat \"^1Warning: ^7%s ^7banned for %s %s by %s^7\"", clientname, Cmd_Argv(2), tduration, cl->name);
+              
+              if (ctest == "client"){
 
-              clId = client - svs.clients;
+                  clId = client - svs.clients;
                  
-              Com_sprintf(cmd, sizeof(cmd), "kick %i \"You have been banned for %s %s\"\n", clId, Cmd_Argv(2), tduration);
-              Cmd_ExecuteString(cmd);
-
+                  Com_sprintf(cmd, sizeof(cmd), "kick %i \"You have been banned for %s %s\"\n", clId, Cmd_Argv(2), tduration);
+                  Cmd_ExecuteString(cmd);
+              }
+              
            }
            else 
            { 
@@ -3502,7 +3507,6 @@ void PB_Cunban(client_t *cl, char *arg)
        int      clientid;
        char	cmd[64];
        int	clevel;
-       char	*test = NULL;
        int      clientlevel;
        char     *type = "UnBan";
        
@@ -4489,7 +4493,6 @@ void PB_Cgametype(client_t *cl, char *arg)
 	   gametype = Cmd_Args();
 
            if (Q_stricmp(gametype, "ffa") == 0){vgametype = 0; ngametype = "FreeForAll";}
-           
            else if (Q_stricmp(gametype, "tdm") == 0){vgametype = 3; ngametype = "TeamDeathMatch";}
            else if (Q_stricmp(gametype, "ts") == 0){vgametype = 4; ngametype = "Team Survivor";}
            else if (Q_stricmp(gametype, "ftl") == 0){vgametype = 5; ngametype = "Follow the Leader";}
@@ -5630,7 +5633,7 @@ int SQ_TestBanname(client_t *cl, char *name)
                            SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^1@%s^7 %s ^3Aka:^7 %s ^3Ban: ^1TempBan^7\"", tid, tname, taka);
                         }
 
-                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^3TempBan expire:^7 %02u/%02u/%02u %02u:%02u\"",ttban->tm_mon, ttban->tm_mday, 1900 + ttban->tm_year, ttban->tm_hour, ttban->tm_min);
+                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^3TempBan expire:^7 %02u/%02u/%02u %02u:%02u\"",ttban->tm_mday, ttban->tm_mon, 1900 + ttban->tm_year, ttban->tm_hour, ttban->tm_min);
                     }
                  }
                  if (i== 20){break;}  
@@ -5735,7 +5738,7 @@ int SQ_TestBanexactname(client_t *cl, char *name)
                            SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^1@%s^7 %s ^3Aka:^7 %s ^3Ban: ^1TempBan^7\"", tid, tname, taka);
                         }
 
-                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^3TempBan expire:^7 %02u/%02u/%02u %02u:%02u\"",ttban->tm_mon, ttban->tm_mday, 1900 + ttban->tm_year, ttban->tm_hour, ttban->tm_min);
+                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^3TempBan expire:^7 %02u/%02u/%02u %02u:%02u\"",ttban->tm_mday, ttban->tm_mon, 1900 + ttban->tm_year, ttban->tm_hour, ttban->tm_min);
                     }
                  }
               }  
@@ -5812,7 +5815,6 @@ void PB_Cinfoban(client_t *cl, char *arg)
        char	*clientname;
        int      clientid;
        int	clevel;
-       char	*test = NULL;
        int      clientlevel;
        int      ban;
 
@@ -5891,10 +5893,10 @@ void PB_Cinfoban(client_t *cl, char *arg)
                      tban = localtime(&timesban);
 
                      if (clientaka == NULL){
-                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^1@%i^7 %s ^3TempBan expire: ^7%02u/%02u/%02u %02u:%02u\"",clientid, clientname,tban->tm_mon, tban->tm_mday, 1900 + tban->tm_year, tban->tm_hour, tban->tm_min);
+                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^1@%i^7 %s ^3TempBan expire: ^7%02u/%02u/%02u %02u:%02u\"",clientid, clientname,tban->tm_mday, tban->tm_mon, 1900 + tban->tm_year, tban->tm_hour, tban->tm_min);
                      }
                      else {
-                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^1@%i^7 %s ^3Aka:^7 %s ^3TempBan expire: ^7%02u/%02u/%02u %02u:%02u\"",clientid, clientname, clientaka, tban->tm_mon, tban->tm_mday, 1900 + tban->tm_year, tban->tm_hour, tban->tm_min);
+                        SV_SendServerCommand(cl, "chat \"^2Info^3[PM]^2: ^1@%i^7 %s ^3Aka:^7 %s ^3TempBan expire: ^7%02u/%02u/%02u %02u:%02u\"",clientid, clientname, clientaka, tban->tm_mday, tban->tm_mon, 1900 + tban->tm_year, tban->tm_hour, tban->tm_min);
                      }
                 }
                 else {
@@ -5926,7 +5928,6 @@ void PB_Cinfoban(client_t *cl, char *arg)
 
        return;
 }
-
 //===========================================================
 
 /*
