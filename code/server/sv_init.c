@@ -687,7 +687,6 @@ void SV_Init (void) {
 	sv_demonotice = Cvar_Get ("sv_demonotice", "Smile! You're on camera!", CVAR_ARCHIVE);
 	sv_demofolder = Cvar_Get ("sv_demofolder", "serverdemos", CVAR_ARCHIVE );
 
-	sv_nospacesinnicks = Cvar_Get("sv_nospacesinnicks", "0", CVAR_ARCHIVE);
 	sv_commands = Cvar_Get("sv_commands", "0", CVAR_ARCHIVE);
 
 	sv_nosmoke = Cvar_Get ("sv_nosmoke", "0", CVAR_ARCHIVE );

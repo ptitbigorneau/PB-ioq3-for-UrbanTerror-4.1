@@ -1431,7 +1431,7 @@ static void SV_Nospace(char *name)
 	*dst = '\0';
 
 	if (strlen(name) == 0) {
-		strcpy(name, "UnnamedPlayer");
+		strcpy(name, "Newbie");
 	}
 }
 
@@ -1444,12 +1444,7 @@ SV_NoSpacesInNicks
 
 void SV_NoSpacesInNicks(client_t *cl, char *name)
 {   
-    if (!Q_stricmp(sv_nospacesinnicks->string, "0")) {
-        return;
-    }
 
-    if (!Q_stricmp(sv_nospacesinnicks->string, "1")) {
- 
     char playername[32];
 
     Q_strncpyz(playername, name, sizeof(playername));
@@ -1460,7 +1455,7 @@ void SV_NoSpacesInNicks(client_t *cl, char *name)
     VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
     
     return;
-    }
+
 }
 
 /*
@@ -1518,6 +1513,84 @@ void SQ_TestDatabase_f(void)
 }
 
 /*
+=================
+SQ_TestName
+=================
+*/
+int SQ_TestName(client_t *cl, char *guid, char *name)
+{
+
+    char *tdatabase;
+    char nrequete[1024];
+    tdatabase = databasefile();
+    sqlite3 *ndb;
+    int nrv;
+    sqlite3_stmt* nstmt;
+    char *taka;
+    char caka[64];
+    char cname[64];
+
+    Q_strncpyz( cname, name, sizeof(cname) );
+    Q_CleanStr( cname );
+
+    tdatabase = databasefile();
+
+    nrv = sqlite3_open(tdatabase,&ndb);
+
+    sprintf(nrequete, "SELECT * from clients");
+    
+    nrv = sqlite3_prepare_v2(ndb,nrequete,-1,&nstmt,0);
+    
+    if (nrv == SQLITE_OK){
+         while(1)
+        {        
+
+           nrv = sqlite3_step(nstmt);
+       
+           if(nrv == SQLITE_ROW)
+           {
+           
+               char *tguid = (char*)sqlite3_column_text(nstmt,4);
+               
+               if ((char*)sqlite3_column_text(nstmt,2) != NULL)
+               {
+                   taka = strdup((char*)sqlite3_column_text(nstmt,2));
+                   Q_strncpyz( caka, taka, sizeof(caka) );
+                   Q_CleanStr( caka );
+
+                  if (!strcmp(cname, caka))
+                  {
+                     if (strcmp(tguid, guid) != 0)
+                     {
+                        SV_SendServerCommand(NULL, "print \"^1Warning: ^3The name '%s' ^3belongs to another player\"", cl->name);
+                        SV_SendServerCommand(NULL, "print \"^1Warning: ^3%s ^3is renamed ^7Newbie\"", cl->name);
+                        Info_SetValueForKey(cl->userinfo, "name", "Newbie");
+                        SV_UserinfoChanged(cl);
+                        VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+                     }
+
+                  }
+                   
+               }   
+                 
+           }
+           
+           else if(nrv == SQLITE_DONE)
+           {
+               break;
+           }  
+
+        }
+    }
+    
+    sqlite3_finalize(nstmt);
+   
+    sqlite3_close(ndb);
+
+}
+
+
+/*
 ==========
 SQ_ClientConnect
 
@@ -1561,9 +1634,13 @@ int SQ_ClientConnect(char *name, char *guid, char *ip, char *type, int level, ch
            char urequete[1024];
         
            if (type == "Setlevel"){
-              
-              sprintf(urequete, "UPDATE clients SET name = '%s', aka = '%s', ip = '%s', level = '%i' WHERE guid = '%s'",name,aka,ip,level,guid);
 
+              if (level == 0){
+                 sprintf(urequete, "UPDATE clients SET name = '%s', aka = NULL, ip = '%s', level = '%i' WHERE guid = '%s'",name,ip,level,guid);
+              }
+              else {
+                 sprintf(urequete, "UPDATE clients SET name = '%s', aka = '%s', ip = '%s', level = '%i' WHERE guid = '%s'",name,aka,ip,level,guid);
+              }
            }
 
            else if (type == "Register"){
@@ -1700,6 +1777,8 @@ void SV_Clientindatabase(client_t *cl, char *type)
         ip = strtok(ip, ":");
 
         SQ_TestDatabase_f();
+
+        SQ_TestName(cl, guid, cl->name);
 
         SQ_ClientConnect(cl->name, guid, ip, type, NULL, NULL, NULL);
 

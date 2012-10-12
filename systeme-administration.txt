@@ -15,8 +15,6 @@ set sv_tellprefix "" // allows you to replace "console_tell: " ingame
 set sv_sayprefix "" // allows you to replace "console: " ingame
 set sv_demonotice ""
 
-set sv_nospacesinnicks "1" // 0 desactive 1 active pour les commandes d'administration
-
 set sv_commands "1" // 0 desactive les commandes d'administration
 
 set sv_nosmoke "0" // 1 no smoke
