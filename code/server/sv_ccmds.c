@@ -1798,9 +1798,13 @@ void SV_Clientindatabase(client_t *cl, char *type)
 
         SQ_TestBan(cl, guid);
 
-        SQ_TestName(cl);
+        if (!Q_stricmp(type, "UpdateUserinfo")){
 
-        return;   
+            SQ_TestName(cl);
+
+       }
+
+       return;  
 }
 /*
 ========================
