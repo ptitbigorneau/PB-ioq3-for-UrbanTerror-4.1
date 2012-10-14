@@ -376,7 +376,6 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg );
 void SV_Heartbeat_f( void );
 void SVD_WriteDemoFile(const client_t*, const msg_t*);
 
-void SV_NoSpacesInNicks(client_t *cl, char *name);
 void SV_ChangeGear(client_t *cl, char *gear);
 
 int TestAdmin(char *adminpath, char *guid);

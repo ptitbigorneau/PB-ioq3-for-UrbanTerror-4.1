@@ -1513,11 +1513,120 @@ void SQ_TestDatabase_f(void)
 }
 
 /*
+==========
+SQ_ClientConnect
+
+==========
+*/
+
+int SQ_ClientConnect(char *name, char *guid, char *ip, char *type, int level, char *aka, int ban)
+{
+
+    char *database;
+    char requete[1024];
+    database = databasefile();
+    sqlite3 *db;
+    int rv;
+    sqlite3_stmt* stmt;
+    time_t t1;
+    char *c;    
+
+    t1 = time(NULL);
+   
+    database = databasefile();
+
+    rv = sqlite3_open(database,&db);
+
+    if (!Q_stricmp(guid, "")) {return;}
+
+    if (c = strpbrk(ip, ":")!= NULL)
+    {
+        ip = strtok(ip, ":");
+    }
+
+    sprintf(requete, "SELECT * from clients where guid = '%s'", guid);
+    rv = sqlite3_prepare_v2(db,requete,-1,&stmt,0);
+   
+    if (rv == SQLITE_OK){
+        int connection;
+        
+        rv = sqlite3_step(stmt);
+       
+        if(rv == SQLITE_ROW)
+        {
+           
+           char *tconnections = (char*)sqlite3_column_text(stmt,6);
+
+           connection = atoi(tconnections);
+           
+           char urequete[1024];
+        
+           if (!Q_stricmp(type, "Setlevel")){
+
+              if (level == 0){
+                 sprintf(urequete, "UPDATE clients SET name = '%s', aka = NULL, ip = '%s', level = '%i' WHERE guid = '%s'",name,ip,level,guid);
+              }
+              else {
+                  if ((!Q_stricmp(name, "Newbie"))||(!Q_stricmp(name, "UnnamedPlayer"))) {return;}
+                  sprintf(urequete, "UPDATE clients SET name = '%s', aka = '%s', ip = '%s', level = '%i' WHERE guid = '%s'",name,aka,ip,level,guid);
+              }
+           }
+
+           else if (!Q_stricmp(type, "Register")){
+
+                  if ((!Q_stricmp(name, "Newbie"))||(!Q_stricmp(name, "UnnamedPlayer"))) {return;}
+
+                  sprintf(urequete, "UPDATE clients SET name = '%s', aka = '%s', ip = '%s', level = '%i' WHERE guid = '%s'",name,aka,ip,level,guid);
+
+           }
+
+           else if (!Q_stricmp(type, "Ban")){
+
+                  sprintf(urequete, "UPDATE clients SET ip = '%s', ban = '%i' WHERE guid = '%s'",ip,ban,guid);
+
+           }
+
+           else if (!Q_stricmp(type, "Unban")){
+
+                  sprintf(urequete, "UPDATE clients SET ban = NULL WHERE guid = '%s'",guid);
+
+           }
+
+           else if (!Q_stricmp(type, "Connect")){
+ 
+                    connection =connection + 1;
+                    sprintf(urequete, "UPDATE clients SET name = '%s', ip = '%s', connections = '%i' WHERE guid = '%s'",name,ip,connection,guid);
+           }
+
+           else if (!Q_stricmp(type, "UpdateUserinfo")){
+
+                    sprintf(urequete, "UPDATE clients SET name = '%s' WHERE guid = '%s'",name,guid);
+           }
+
+           rv = sqlite3_exec(db,urequete,0,0,0);
+        }
+
+        else {
+
+           char irequete[1024];
+           sprintf(irequete, "INSERT INTO clients (\"name\", \"ip\", \"guid\", \"level\", \"connections\", \"date\", \"ban\") VALUES('%s', '%s', '%s', '0', '1', '%ld', NULL)",name,ip,guid,t1);
+
+           rv = sqlite3_exec(db,irequete,0,0,0);
+
+        }
+
+    } 
+  
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
+
+/*
 =================
 SQ_TestName
 =================
 */
-int SQ_TestName(client_t *cl, char *guid, char *name)
+int SQ_TestName(client_t *cl)
 {
 
     char *tdatabase;
@@ -1530,9 +1639,6 @@ int SQ_TestName(client_t *cl, char *guid, char *name)
     char caka[64];
     char cname[64];
 
-    Q_strncpyz( cname, name, sizeof(cname) );
-    Q_CleanStr( cname );
-
     tdatabase = databasefile();
 
     nrv = sqlite3_open(tdatabase,&ndb);
@@ -1540,6 +1646,12 @@ int SQ_TestName(client_t *cl, char *guid, char *name)
     sprintf(nrequete, "SELECT * from clients");
     
     nrv = sqlite3_prepare_v2(ndb,nrequete,-1,&nstmt,0);
+
+    char *nbguid = Info_ValueForKey(cl->userinfo, "cl_guid");
+    char *nbname = cl->name;
+
+    Q_strncpyz( cname, nbname, sizeof(cname) );
+    Q_CleanStr( cname );
     
     if (nrv == SQLITE_OK){
          while(1)
@@ -1560,13 +1672,15 @@ int SQ_TestName(client_t *cl, char *guid, char *name)
 
                   if (!strcmp(cname, caka))
                   {
-                     if (strcmp(tguid, guid) != 0)
+                     if (strcmp(tguid, nbguid) != 0)
                      {
-                        SV_SendServerCommand(NULL, "print \"^1Warning: ^3The name '%s' ^3belongs to another player\"", cl->name);
-                        SV_SendServerCommand(NULL, "print \"^1Warning: ^3%s ^3is renamed ^7Newbie\"", cl->name);
+                        SV_SendServerCommand(NULL, "print \"^1Warning: ^3The name '^7%s' ^3belongs to another player\"", cl->name);
+                        SV_SendServerCommand(NULL, "print \"^1Warning: ^7%s ^3is renamed ^7Newbie\"", cl->name);
+
                         Info_SetValueForKey(cl->userinfo, "name", "Newbie");
                         SV_UserinfoChanged(cl);
                         VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+
                      }
 
                   }
@@ -1588,104 +1702,6 @@ int SQ_TestName(client_t *cl, char *guid, char *name)
     sqlite3_close(ndb);
 
 }
-
-
-/*
-==========
-SQ_ClientConnect
-
-==========
-*/
-
-int SQ_ClientConnect(char *name, char *guid, char *ip, char *type, int level, char *aka, int ban)
-{
-
-    char *database;
-    char requete[1024];
-    database = databasefile();
-    sqlite3 *db;
-    int rv;
-    sqlite3_stmt* stmt;
-    time_t t1;
-   
-    t1 = time(NULL);
-   
-    database = databasefile();
-
-    rv = sqlite3_open(database,&db);
-
-    sprintf(requete, "SELECT * from clients where guid = '%s'", guid);
-    rv = sqlite3_prepare_v2(db,requete,-1,&stmt,0);
-   
-    if (rv == SQLITE_OK){
-        int connection;
-        
-        rv = sqlite3_step(stmt);
-       
-        if(rv == SQLITE_ROW)
-        {
-           
-           char *tconnections = (char*)sqlite3_column_text(stmt,6);
-
-           connection = atoi(tconnections);
-           
-           char *taka = (char*)sqlite3_column_text(stmt,2);
-    
-           char urequete[1024];
-        
-           if (type == "Setlevel"){
-
-              if (level == 0){
-                 sprintf(urequete, "UPDATE clients SET name = '%s', aka = NULL, ip = '%s', level = '%i' WHERE guid = '%s'",name,ip,level,guid);
-              }
-              else {
-                 sprintf(urequete, "UPDATE clients SET name = '%s', aka = '%s', ip = '%s', level = '%i' WHERE guid = '%s'",name,aka,ip,level,guid);
-              }
-           }
-
-           else if (type == "Register"){
-
-                  sprintf(urequete, "UPDATE clients SET name = '%s', aka = '%s', ip = '%s', level = '%i' WHERE guid = '%s'",name,aka,ip,level,guid);
-
-           }
-
-           else if (type == "Ban"){
-
-                  sprintf(urequete, "UPDATE clients SET ip = '%s', ban = '%i' WHERE guid = '%s'",ip,ban,guid);
-
-           }
-
-           else if (type == "UnBan"){
-
-                  sprintf(urequete, "UPDATE clients SET ban = NULL WHERE guid = '%s'",guid);
-
-           }
-
-           else {
-                 if (type == "Connect"){
-                     connection =connection + 1;
-                 }
-                 sprintf(urequete, "UPDATE clients SET name = '%s', ip = '%s', connections = '%i' WHERE guid = '%s'",name,ip,connection,guid);
-           }
-           
-           rv = sqlite3_exec(db,urequete,0,0,0);
-        }
-
-        else {
-
-           char irequete[1024];
-           sprintf(irequete, "INSERT INTO clients (\"name\", \"ip\", \"guid\", \"level\", \"connections\", \"date\", \"ban\") VALUES('%s', '%s', '%s', '0', '1', '%ld', NULL)",name,ip,guid,t1);
-
-           rv = sqlite3_exec(db,irequete,0,0,0);
-
-        }
-
-    } 
-  
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
-}
-
 /*
 =================
 SQ_TestBan
@@ -1771,18 +1787,18 @@ SV_Clientindatabase
 
 void SV_Clientindatabase(client_t *cl, char *type)
 {  
+        SQ_TestDatabase_f();
+
         char *guid = Info_ValueForKey(cl->userinfo, "cl_guid");
         char *ip = Info_ValueForKey(cl->userinfo, "ip");
 
         ip = strtok(ip, ":");
 
-        SQ_TestDatabase_f();
-
-        SQ_TestName(cl, guid, cl->name);
-
         SQ_ClientConnect(cl->name, guid, ip, type, NULL, NULL, NULL);
 
         SQ_TestBan(cl, guid);
+
+        SQ_TestName(cl);
 
         return;   
 }
@@ -2190,9 +2206,14 @@ static void SV_SetLevel_f(void)
 
     char *aka = cl->name;
 
-    SQ_ClientConnect(cl->name, guid, ip, type, level, aka, NULL);
-    Com_Printf("changelevel: %s ^7is put in level(^1%d^7)\n",cl->name, level);
+    if ((!Q_stricmp(cl->name, "Newbie"))||(!Q_stricmp(cl->name, "UnnamedPlayer"))) {
+        SV_SendServerCommand(cl, "chat \"^1Warning^3[PM]^2: ^7You can not change the level of %s^7\"", cl->name);
+    }
+    else {
 
+        SQ_ClientConnect(cl->name, guid, ip, type, level, aka, NULL);
+        Com_Printf("changelevel: %s ^7is put in level(^1%d^7)\n",cl->name, level);
+    } 
     CmdsTest();
 
 }
@@ -3224,10 +3245,15 @@ void PB_Cregister(client_t *cl)
                            
               if (clientaka == NULL){clientlevel = 1;}
 
-              SQ_ClientConnect(cl->name, cguid, ip, "Register", clientlevel, aka, NULL);
+              if ((!Q_stricmp(cl->name, "Newbie"))||(!Q_stricmp(cl->name, "UnnamedPlayer"))) {
+                   SV_SendServerCommand(cl, "chat \"^1Warning^3[PM]^2: ^7You can not get registered with nickname '%s^7'\"", cl->name);
+              }
+              else {
 
-              SV_SendServerCommand(cl, "chat \"^2Server^3[PM]^2: ^7You are registered with the nickname %s ^7at level (^1%i^7)\"", cl->name, clientlevel);
+                   SQ_ClientConnect(cl->name, cguid, ip, "Register", clientlevel, aka, NULL);
 
+                   SV_SendServerCommand(cl, "chat \"^2Server^3[PM]^2: ^7You are registered with the nickname %s ^7at level (^1%i^7)\"", cl->name, clientlevel);
+              }
        }
 
        return;
@@ -3323,12 +3349,18 @@ void PB_Csetlevel(client_t *cl, char *arg)
            if (guid != NULL) 
            {
 
-               SQ_ClientConnect(clientname, guid, clientip, type, newlevel, clientname, NULL);
+              if ((!Q_stricmp(clientname, "Newbie"))||(!Q_stricmp(clientname, "UnnamedPlayer"))) {
+                   SV_SendServerCommand(cl, "chat \"^1Warning^3[PM]^2: ^7You can not change the level of %s^7\"", clientname);
+              }
+              else {
+
+                   SQ_ClientConnect(clientname, guid, clientip, type, newlevel, clientname, NULL);
                
-               SV_SendServerCommand(cl, "chat \"^2Server^3[PM]^2: ^7You have put %s ^7at level (^1%i^7)\"", clientname, newlevel);
-               if (dtest == "client"){
-                   SV_SendServerCommand(client, "chat \"^2Server^3[PM]^2: ^7%s ^7just put you at level (^1%i^7)\"", cl->name, newlevel);
-               }
+                   SV_SendServerCommand(cl, "chat \"^2Server^3[PM]^2: ^7You have put %s ^7at level (^1%i^7)\"", clientname, newlevel);
+                   if (dtest == "client"){
+                      SV_SendServerCommand(client, "chat \"^2Server^3[PM]^2: ^7%s ^7just put you at level (^1%i^7)\"", cl->name, newlevel);
+                   }
+              }
            }
            else 
            { 
