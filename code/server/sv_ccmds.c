@@ -1799,12 +1799,10 @@ void SV_Clientindatabase(client_t *cl, char *type)
         SQ_TestBan(cl, guid);
 
         if (!Q_stricmp(type, "UpdateUserinfo")){
+           SQ_TestName(cl);
+        }
 
-            SQ_TestName(cl);
-
-       }
-
-       return;  
+        return;    
 }
 /*
 ========================
@@ -2425,9 +2423,21 @@ int SQ_TestClient(char *guid, char *type)
               return tname;
  
            }
-
+       
+       }
+       else {
+         sqlite3_finalize(stmtt);
+         sqlite3_close(tdb);    
+         return NULL;
        }
     } 
+    else {
+      sqlite3_finalize(stmtt);
+      sqlite3_close(tdb);    
+      return NULL;
+
+   }
+
     
     sqlite3_finalize(stmtt);
    
@@ -2530,11 +2540,6 @@ void PB_Cme (client_t *cl) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        int      clientlevel;
-       char     *playeraka;
-       char	*playerip;
-       char	*playerconnection;
-       char	*playerdate;
-       int      playerid;
 
        time_t timestamp;
        struct tm * t;
@@ -2553,6 +2558,13 @@ void PB_Cme (client_t *cl) {
 
        else 
        {   
+
+              char      *playeraka;
+              char	*playerip;
+              char	*playerconnection;
+              char	*playerdate;
+              int       playerid;
+
               playerip = Info_ValueForKey(cl->userinfo, "ip");
 
               playeraka = SQ_TestClient(cguid, "Aka");
@@ -2841,12 +2853,9 @@ void PB_Ckick (client_t *cl, char *arg) {
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       int      clId;
-       client_t *client;
-       
+     
        clevel = TestLevel("kick");
 
        if (clevel == -1){clevel = 3;}
@@ -2861,6 +2870,10 @@ void PB_Ckick (client_t *cl, char *arg) {
 
        else 
        {   
+
+           int      clId;
+           client_t *client;
+           char     cmd[64]; 
 
            Cmd_TokenizeString( arg );
            
@@ -2902,13 +2915,8 @@ void PB_Cslap (client_t *cl, char *arg) {
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       int      clId;
-       client_t *client;
-       playerState_t	*ps;
-       int	cteam;
        
        clevel = TestLevel("slap");
 
@@ -2924,6 +2932,13 @@ void PB_Cslap (client_t *cl, char *arg) {
 
        else 
        { 
+
+           int           clId;
+           client_t      *client;
+           playerState_t *ps;
+           int	         cteam;
+           char          cmd[64];
+
            Cmd_TokenizeString( arg );
   
            if (Cmd_Argc() != 2) 
@@ -2970,13 +2985,8 @@ void PB_Ckill (client_t *cl, char *arg) {
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       int      clId;
-       client_t *client;
-       playerState_t	*ps;
-       int	cteam;
 
        clevel = TestLevel("kill");
 
@@ -2992,6 +3002,12 @@ void PB_Ckill (client_t *cl, char *arg) {
 
        else 
        { 
+
+           int            clId;
+           client_t       *client;
+           playerState_t  *ps;
+           int	          cteam;
+           char	          cmd[64];
 
            Cmd_TokenizeString( arg );
   
@@ -3040,13 +3056,6 @@ void PB_Clist( client_t *cl ) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        int      clientlevel;
-       int      playerlevel;
-       int		i;
-       client_t        *client;
-       playerState_t	*ps;
-       char     *cteam;
-       int     nteam;
-       char	*guid;
 
        clevel = TestLevel("list");
 
@@ -3062,35 +3071,47 @@ void PB_Clist( client_t *cl ) {
 
        else 
        {   
-            for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
+
+            char           *guid;
+            int		   i;
+            int            playerlevel;
+            client_t       *clientl;
+
+            for (i=0,clientl=svs.clients ; i < sv_maxclients->integer ; i++,clientl++)
 	    {
-		if (!client->state)
+		if (!clientl->state)
 			continue;
+            
+                playerState_t  *ps;
+                char           *lteam = NULL;
+                int            nuteam = NULL;
+		
+                ps = SV_GameClientNum( i );
+		nuteam = ps->persistant[PERS_TEAM];
 
-		ps = SV_GameClientNum( i );
-		nteam = ps->persistant[PERS_TEAM];
-
-                if (nteam == 0)
+                if (nuteam == 0)
                 {
-                   cteam = "^3Free";
+                   lteam = "^3Free";
                 }
-                if (nteam == 1)
+                if (nuteam == 1)
                 {
-                   cteam = "^1Red";
+                   lteam = "^1Red";
                 }
-                if (nteam == 2)
+                if (nuteam == 2)
                 {
-                   cteam = "^4Blue";
+                   lteam = "^4Blue";
                 }
-                if (nteam == 3)
+                if (nuteam == 3)
                 {
-                   cteam = "^3Spectator";
+                   lteam = "^3Spectator";
                 }
 
-                guid = Info_ValueForKey(client->userinfo, "cl_guid");
+                guid = Info_ValueForKey(clientl->userinfo, "cl_guid");
                 playerlevel = SQ_TestClient(guid, "Setlevel");
 
-                SV_SendServerCommand(cl, "chat \"^1PLAYER^3[PM]^1: ^7[^1%i^7]%s^3 Level^7(^2%i^7) ^3Score: ^5%i ^3Team: %s^7\"", i, client->name, playerlevel, ps->persistant[PERS_SCORE], cteam);
+                if (playerlevel == NULL ) {playerlevel = 0;}
+
+                SV_SendServerCommand(cl, "chat \"^1PLAYER^3[PM]^1: ^7[^1%i^7]%s^3 Level^7(^2%i^7) ^3Score: ^5%i ^3Team: %s^7\"", i, clientl->name, playerlevel, ps->persistant[PERS_SCORE], lteam);
 
             }   
        }
@@ -3108,19 +3129,10 @@ void PB_Cplayerinfo (client_t *cl, char *arg) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        int      clientlevel;
-       client_t *client;
-       int      playerlevel;
-       char     *playeraka;
-       char	*playerip;
-       char	*playerguid;
-       char     *playerconnection;
-       char	*playerdate;
-       char	*playername;
-       int      playerid;
-      
 
        time_t timestamp;
        struct tm * t;
+       
        clevel = TestLevel("playerinfo");
 
        if (clevel == -1){clevel = 3;}
@@ -3135,6 +3147,16 @@ void PB_Cplayerinfo (client_t *cl, char *arg) {
 
        else 
        { 
+
+           client_t *client;
+           int      playerlevel;
+           char     *playeraka;
+           char     *playerip;
+           char     *playerguid;
+           char     *playerconnection;
+           char     *playerdate;
+           char     *playername;
+           int      playerid;
 
            Cmd_TokenizeString( arg );
   
@@ -3184,13 +3206,20 @@ void PB_Cplayerinfo (client_t *cl, char *arg) {
            if (playerguid != NULL)  
            {
               playerlevel = SQ_TestClient(playerguid, "Setlevel");
+
+              if ((playerid == NULL)||(playerguid == NULL)) {
+
+                 SV_SendServerCommand(cl, "chat \"^1Warning^3[PM]^2: %s is not in the database^7\"", playername);
+                 return;
+              }
+
               playeraka = SQ_TestClient(playerguid, "Aka");
               playerconnection = SQ_TestClient(playerguid, "Connections");
               playerdate = SQ_TestClient(playerguid, "Date");
 
               timestamp = atoi(playerdate);
               t = localtime(&timestamp);
-      
+
               if (playeraka == NULL){
 
                     SV_SendServerCommand(cl, "chat \"^2INFO^3[PM]^2: ^3ID: ^5@%i ^7%s ^3Level^7(^1%i^7)\"",playerid, playername, playerlevel);
@@ -3271,16 +3300,9 @@ void PB_Csetlevel(client_t *cl, char *arg)
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	*guid;
        int	clevel;
-       int	newlevel;
        int      clientlevel;
-       client_t *client;
-       char	*type = "Setlevel";
-       char	*clientip;
-       char	*clientname;
-       int      clientid;
-       char     *dtest = NULL;       
+       char     *type = "Setlevel";
 
        clevel = TestLevel("setlevel");
 
@@ -3297,6 +3319,14 @@ void PB_Csetlevel(client_t *cl, char *arg)
        else 
        {   
 
+           client_t *client;
+           char	    *clientip;
+           char	    *clientname;
+           int      clientid;
+           char     *dtest = NULL;       
+           int      newlevel;
+           char     *guid;
+
            Cmd_TokenizeString( arg );
 
            if (Cmd_Argc() != 3)
@@ -3307,7 +3337,7 @@ void PB_Csetlevel(client_t *cl, char *arg)
 
            newlevel = atoi(Cmd_Argv(2));
            
-           if (newlevel > 5 || newlevel < 0) {
+           if (newlevel > 10 || newlevel < 0) {
               SV_SendServerCommand(cl, "chat \"^1ERROR^3[PM]^1:^7 Level 0 or 1 or 2 or 3 or 5\"");
               return;}
 
@@ -3374,7 +3404,6 @@ void PB_Csetlevel(client_t *cl, char *arg)
 
        return;
 }
-
 // !ban
 void PB_Cban(client_t *cl, char *arg)
 {   
@@ -3384,16 +3413,9 @@ void PB_Cban(client_t *cl, char *arg)
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        char	*guid;
-       char	cmd[64];
-       int      clId;
        int	clevel;
        int      clientlevel;
        char     *type = "Ban";
-       char	*clientip;
-       char	*clientname;
-       int      clientid;
-       char     *etest = NULL;
-       client_t *client;
 
        clevel = TestLevel("ban");
 
@@ -3409,6 +3431,14 @@ void PB_Cban(client_t *cl, char *arg)
 
        else 
        {   
+
+           char     *clientip;
+           char	    *clientname;
+           int      clientid;
+           char     *etest = NULL;
+           client_t *client;
+           char	    cmd[64];
+           int      clId;
 
            Cmd_TokenizeString( arg );
            
@@ -3490,22 +3520,8 @@ void PB_Ctempban(client_t *cl, char *arg)
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	*guid;
-       char	cmd[64];
-       int      clId;
        int	clevel;
-       char	*test = NULL;
        int      clientlevel;
-       char     *type = "Ban";
-       int      duration;
-       char     *induration;
-       char     *tduration;
-       int      ban;
-       char	*clientip;
-       char	*clientname;
-       int      clientid;
-       client_t *client;
-       char *ctest = NULL;
 
        clevel = TestLevel("tempban");
 
@@ -3521,6 +3537,21 @@ void PB_Ctempban(client_t *cl, char *arg)
 
        else 
        {   
+
+           int      duration;
+           char     *induration;
+           char     *tduration;
+           int      ban;
+           char	    *clientip;
+           char	    *clientname;
+           int      clientid;
+           client_t *client;
+           char	    *test = NULL;
+           char     *ctest = NULL;
+           char	    cmd[64];
+           int      clId;
+           char	    *guid;
+           char     *type = "Ban";
 
            Cmd_TokenizeString( arg );
            
@@ -3616,16 +3647,9 @@ void PB_Cunban(client_t *cl, char *arg)
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	*guid;
-       char	*clientip;
-       char	*clientname;
-       int      clientid;
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       char     *type = "UnBan";
-       
-       
+
        clevel = TestLevel("unban");
 
        if (clevel == -1){clevel = 5;}
@@ -3640,6 +3664,13 @@ void PB_Cunban(client_t *cl, char *arg)
 
        else 
        {   
+
+           char   *type = "UnBan";
+           char   *guid;
+           char	  *clientip;
+           char   *clientname;       
+           char   cmd[64];
+           int    clientid;
 
            Cmd_TokenizeString( arg );
            
@@ -3702,11 +3733,7 @@ void PB_Cforce(client_t *cl, char *arg)
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
-       char	*newteam;
        int      clientlevel;
-       client_t *client;
-       int	clId;
-       char	cmd[64];
 
        clevel = TestLevel("force");
 
@@ -3721,6 +3748,11 @@ void PB_Cforce(client_t *cl, char *arg)
        }
        else
        {
+
+           client_t *client;
+           int	clId;
+           char	cmd[64];
+           char	*newteam;
 
            Cmd_TokenizeString( arg );
 
@@ -3774,19 +3806,6 @@ void PB_Cteams( client_t *cl ) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        int      clientlevel;
-       int		i;
-       client_t        *client;
-       playerState_t	*ps;
-       int      cteam;
-       char     *mteam;
-       int      oteam;
-       int	nr = 0;
-       int	nb = 0;
-       int	ns = 0;
-       int      compteur;
-       int      nplayermove;
-       char	cmd[64];
-       int	clId;
 
        clevel = TestLevel("teams");
 
@@ -3800,8 +3819,23 @@ void PB_Cteams( client_t *cl ) {
            return; 
        }
 
+
        else 
        {   
+
+            int            i;
+            client_t       *client;
+            playerState_t  *ps;
+            int            cteam = NULL;
+            char           *mteam = NULL;
+            int            oteam;
+            int            nr = 0;
+            int	           nb = 0;
+            int	           ns = 0;
+            int            compteur = 0;
+            int            nplayermove;
+            char           cmd[64];
+            int            clId;
 
             for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
 	    {
@@ -4032,13 +4066,8 @@ void PB_Cnuke (client_t *cl, char *arg) {
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       int      clId;
-       client_t *client;
-       playerState_t	*ps;
-       int	cteam;
        
        clevel = TestLevel("nuke");
 
@@ -4054,6 +4083,13 @@ void PB_Cnuke (client_t *cl, char *arg) {
 
        else 
        { 
+
+           int      clId;
+           client_t *client;
+           playerState_t *ps;
+           int	cteam;
+           char	cmd[64];
+
            Cmd_TokenizeString( arg );
   
            if (Cmd_Argc() != 2) 
@@ -4257,12 +4293,8 @@ void PB_Cmute (client_t *cl, char *arg) {
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       int      clId;
-       client_t *client;
-
        
        clevel = TestLevel("mute");
 
@@ -4278,6 +4310,11 @@ void PB_Cmute (client_t *cl, char *arg) {
 
        else 
        { 
+
+           int      clId;
+           client_t *client;
+           char	cmd[64];
+
            Cmd_TokenizeString( arg );
   
            if (Cmd_Argc() != 2) 
@@ -5231,15 +5268,8 @@ void PB_Csuperslap (client_t *cl, char *arg) {
     }
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       char	cmd[64];
        int	clevel;
        int      clientlevel;
-       int      clId;
-       client_t *client;
-       playerState_t	*ps;
-       int	cteam;
-       int      nslap;
-       int      i;
 
        clevel = TestLevel("superslap");
 
@@ -5255,6 +5285,15 @@ void PB_Csuperslap (client_t *cl, char *arg) {
 
        else 
        { 
+
+          int      clId;
+          client_t *client;
+          playerState_t	*ps;
+          int	cteam;
+          int      nslap;
+          int      i;
+          char	cmd[64];
+
            Cmd_TokenizeString( arg );
   
            if (Cmd_Argc() != 3) 
@@ -5325,11 +5364,6 @@ void PB_Cadmins(client_t *cl) {
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        int	clevel;
        int      clientlevel;
-       int      i;
-       client_t *client;
-       char *adminguid;
-       char *adminaka;
-       int   adminlevel;
 
        clevel = TestLevel("admins");
 
@@ -5346,6 +5380,11 @@ void PB_Cadmins(client_t *cl) {
        else 
        {   
 
+          int      i;
+          client_t *client;
+          char *adminguid;
+          char *adminaka;
+          int   adminlevel;
  
           SV_SendServerCommand(cl, "chat \"^2Admins online^3[PM]:\"");
 
@@ -5925,13 +5964,8 @@ void PB_Cinfoban(client_t *cl, char *arg)
 
        char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
        char	*guid;
-       char	*clientaka;
-       int      clientban;
-       char	*clientname;
-       int      clientid;
        int	clevel;
        int      clientlevel;
-       int      ban;
 
        struct tm * tban;
        time_t timestamp;
@@ -5953,6 +5987,12 @@ void PB_Cinfoban(client_t *cl, char *arg)
 
        else 
        {   
+
+           char	*clientaka;
+           int      clientban;
+           char	*clientname;
+           int      clientid;
+           int      ban;
 
            Cmd_TokenizeString( arg );
            

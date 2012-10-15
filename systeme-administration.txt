@@ -100,6 +100,7 @@ sauf pour les commandes suivantes:
 !mapname -> /pbmapname
 !nextmap -> /pbnextmap
 !kill -> /pbkill
+!map -> /pbmap
 !kick -> /pbkick
 !exec -> /pbexec
 !timelimte -> /pbtimelimit

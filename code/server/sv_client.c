@@ -1639,7 +1639,7 @@ static ucmd_t ucmds_floodControl[] = {
 	//arg
 	{"moon", PB_Fmoon},
 	{"setnextmap", PB_Fsetnextmap},
-	{"map", PB_Fmap},
+	{"pbmap", PB_Fmap},
 	{"slap", PB_Fslap},
 	{"pbkill", PB_Fkill},
 	{"pbkick", PB_Fkick},
