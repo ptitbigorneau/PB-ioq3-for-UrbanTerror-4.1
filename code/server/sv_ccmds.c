@@ -3775,11 +3775,12 @@ void PB_Cforce(client_t *cl, char *arg)
                {
 
                   clId = client - svs.clients;
+
+                  SV_SendServerCommand(cl, "chat \"^1Warning^3[PM]^1: ^7%s ^7forced to: %s\"", client->name, newteam);
+                  SV_SendServerCommand(client, "chat \"^1Warning^3[PM]^1: ^7Your are forced to: %s\"", newteam);
                
                   Com_sprintf(cmd, sizeof(cmd), "forceteam %i %s\n", clId, newteam);
                   Cmd_ExecuteString(cmd);
-                  SV_SendServerCommand(cl, "chat \"^1Warning^3[PM]^1: ^7%s ^7forced to: %s\"", client->name, newteam);
-                  SV_SendServerCommand(client, "chat \"^1Warning^3[PM]^1: ^7Your are forced to: %s\"", newteam);
 
                 }
                 else 
@@ -3796,142 +3797,188 @@ void PB_Cforce(client_t *cl, char *arg)
        return;
 }
 
-// !teams
-void PB_Cteams( client_t *cl ) {
-
-    if (!Q_stricmp(sv_commands->string, "0")) {
+// !teams by Elite
+void PB_Cteams( client_t *cl ) 
+{
+    if (!Q_stricmp(sv_commands->string, "0"))
         return;
+
+    char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
+    int	clevel;
+    int      clientlevel;
+
+    clevel = TestLevel("teams");
+
+    if (clevel == -1){clevel = 1;}
+
+    clientlevel = SQ_TestClient(cguid, "Setlevel");
+
+    if (clevel > clientlevel) 
+    {
+	    SV_SendServerCommand(NULL, "chat \"^1Warning: ^7%s ^7trying to use an admin command\"", cl->name);
+		return; 
     }
 
-       char	*cguid = Info_ValueForKey(cl->userinfo, "cl_guid");
-       int	clevel;
-       int      clientlevel;
+    else 
+    {   
 
-       clevel = TestLevel("teams");
+		int                 i, z = 0;
+		client_t            *client;
+		int                 oteam;
+		int                 nr = 0;
+		int	            nb = 0;
+		int	            ns = 0;
+		int                 compteur = 0;
+		int                 nplayermove;
+		char                cmd[64];
+		char				player;
+		int                 clId;
 
-       if (clevel == -1){clevel = 1;}
+		int ntotal = 0;
+		
+		for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++) //calcul du nombre total de joueur sur le serveur
+		{
+			if (!client->state)
+				continue;
 
-       clientlevel = SQ_TestClient(cguid, "Setlevel");
+			ntotal++;
+		}
+		
+		char  *teamRedList = Cvar_VariableString( "g_redteamlist" );		/* recuperation */
+		char  *teamBlueList = Cvar_VariableString( "g_blueteamlist" );		/* des joueurs rouge et bleu */
+		
+		nr = strlen(teamRedList);	//nombre de rouge
+		nb = strlen(teamBlueList);	//nombre de bleu
+		ns = ntotal - (nr + nb);	//nombre de spectateurs
+  
+	    SV_SendServerCommand(NULL, "chat \"^2INFO: ^7RED: ^1%i ^7- BLUE: ^4%i ^7- SPECTATOR: ^3%i^7\"", nr, nb, ns);
 
-       if (clevel > clientlevel) 
-       {
-           SV_SendServerCommand(NULL, "chat \"^1Warning: ^7%s ^7trying to use an admin command\"", cl->name);
-           return; 
-       }
+	    compteur = fabs(nr - nb);	// difference de joueurs entre les deux teams
 
-
-       else 
-       {   
-
-            int            i;
-            client_t       *client;
-            playerState_t  *ps;
-            int            cteam = NULL;
-            char           *mteam = NULL;
-            int            oteam;
-            int            nr = 0;
-            int	           nb = 0;
-            int	           ns = 0;
-            int            compteur = 0;
-            int            nplayermove;
-            char           cmd[64];
-            int            clId;
-
-            for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
+	    if (compteur > 1) // on commence lequilibrage
 	    {
-		if (!client->state)
-			continue;
 
-		ps = SV_GameClientNum( i );
-		cteam = ps->persistant[PERS_TEAM];
+			char *mteam = NULL;
+			nplayermove = compteur / 2;  
+			
+			if (nr > nb) // RED > BLUE
+			{Com_Printf( "test 4.\n" );
+				oteam = 1; mteam = "b";
+				
+				for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
+				{
+					if (!client->state)
+						continue;
+					
+					nplayermove--;
 
-                if (cteam == 1)
-                {
-                   nr++;
-                }
-                if (cteam == 2)
-                {
-                   nb++;
-                }
-                if (cteam == 3)
-                {
-                   ns++;
-                }
+					if (nplayermove >= 0)
+					{
+						player = *(teamRedList + i);
+						
+						switch(player)
+						{
+							case 'A': clId = 0;break;
+							case 'B': clId = 1;break;
+							case 'C': clId = 2;break;
+							case 'D': clId = 3;break;
+							case 'E': clId = 4;break;
+							case 'F': clId = 5;break;
+							case 'G': clId = 6;break;
+							case 'H': clId = 7;break;
+							case 'I': clId = 8;break;
+							case 'J': clId = 9;break;
+							case 'K': clId = 10;break;
+							case 'L': clId = 11;break;
+							case 'M': clId = 12;break;
+							case 'N': clId = 13;break;
+							case 'O': clId = 14;break;
+							case 'P': clId = 15;break;
+							case 'Q': clId = 16;break;
+							case 'R': clId = 17;break;
+							case 'S': clId = 18;break;
+							case 'T': clId = 19;break;
+							case 'U': clId = 20;break;
+							case 'V': clId = 21;break;
+							case 'W': clId = 22;break;
+							case 'X': clId = 23;break;
+							case 'Y': clId = 24;break;
+							case 'Z': clId = 25;break;
+						}
+						
+//						clId = client - svs.clients;
+						Com_sprintf(cmd, sizeof(cmd), "forceteam %i %s\n", clId, mteam);
+						Cmd_ExecuteString(cmd);
+					}
+                                      
+					else {
+						break;}
+				}
+			}
 
-            }   
-       SV_SendServerCommand(NULL, "chat \"^2INFO: ^7RED: ^1%i ^7- BLUE: ^4%i ^7- SPECTATOR: ^3%i^7\"", nr, nb, ns);
+			if (nb > nr) // BLUE > RED
+			{
+				oteam = 2; mteam = "r";
 
-       compteur = fabs(nr - nb);
+				for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
+				{
+					if (!client->state)
+						continue;
+					
+					nplayermove--;
 
-       if (compteur > 1)
-       {
-         
-         if (nr > nb){oteam = 1; mteam = "b";}
-         if (nb > nr){oteam = 2; mteam = "r";}
- 
-         nplayermove = compteur / 2;
+					if (nplayermove >= 0)
+					{
+						player = *(teamBlueList + i);
+						
+						switch(player)
+						{
+							case 'A': clId = 0;break;
+							case 'B': clId = 1;break;
+							case 'C': clId = 2;break;
+							case 'D': clId = 3;break;
+							case 'E': clId = 4;break;
+							case 'F': clId = 5;break;
+							case 'G': clId = 6;break;
+							case 'H': clId = 7;break;
+							case 'I': clId = 8;break;
+							case 'J': clId = 9;break;
+							case 'K': clId = 10;break;
+							case 'L': clId = 11;break;
+							case 'M': clId = 12;break;
+							case 'N': clId = 13;break;
+							case 'O': clId = 14;break;
+							case 'P': clId = 15;break;
+							case 'Q': clId = 16;break;
+							case 'R': clId = 17;break;
+							case 'S': clId = 18;break;
+							case 'T': clId = 19;break;
+							case 'U': clId = 20;break;
+							case 'V': clId = 21;break;
+							case 'W': clId = 22;break;
+							case 'X': clId = 23;break;
+							case 'Y': clId = 24;break;
+							case 'Z': clId = 25;break;
+						}
+						Com_sprintf(cmd, sizeof(cmd), "forceteam %i %s\n", clId, mteam);
+						Cmd_ExecuteString(cmd);
+					}
+					else{
+						break;}
+				}
 
-       	    nr = 0;
-            nb = 0;
-            ns = 0;
-       
-            for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
+			}
+	 
+			//SV_SendServerCommand(NULL, "chat \"^2INFO: ^7Teams are now balanced Red: ^1%i ^7Blue: ^4%i^7\"", nr, nb);
+			SV_SendServerCommand(NULL, "cp \"Teams are now balanced\"");
+	   }
+
+	    else
 	    {
-		if (!client->state)
-			continue;
-
-		ps = SV_GameClientNum( i );
-		cteam = ps->persistant[PERS_TEAM];
-
-                if (cteam == oteam)
-                {
-                  nplayermove = nplayermove - 1;
-
-                  if (nplayermove >= 0)
-                  {
-                     clId = client - svs.clients;
-                     Com_sprintf(cmd, sizeof(cmd), "forceteam %i %s\n", clId, mteam);
-                     Cmd_ExecuteString(cmd);
-                  }
-                }
-            }
-
-            for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
-	    {
-		if (!client->state)
-			continue;
-
-		ps = SV_GameClientNum( i );
-		cteam = ps->persistant[PERS_TEAM];
-
-                if (cteam == 1)
-                {
-                   nr++;
-                }
-                if (cteam == 2)
-                {
-                   nb++;
-                }
-                if (cteam == 3)
-                {
-                   ns++;
-                }
-
-            }            
-
-         SV_SendServerCommand(NULL, "chat \"^2INFO: ^7Teams are now balanced Red: ^1%i ^7Blue: ^4%i^7\"", nr, nb);
-         SV_SendServerCommand(NULL, "cp \"Teams are now balanced\"");
-       }
-
-       else
-       {
-         SV_SendServerCommand(NULL, "chat \"^2INFO: ^7Teams are already balanced Red: ^1%i ^7Blue: ^4%i^7\"", nr, nb);
-         SV_SendServerCommand(NULL, "cp \"Teams are already balanced\"");
-       }
-
-          
-     }
-     return;      
+			//SV_SendServerCommand(NULL, "chat \"^2INFO: ^7Teams are already balanced Red: ^1%i ^7Blue: ^4%i^7\"", nr, nb);
+			SV_SendServerCommand(NULL, "cp \"Teams are already balanced\"");
+	    }
+    }     
 }
 
 // !mapname
