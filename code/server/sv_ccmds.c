@@ -1470,7 +1470,7 @@ int databasefile ()
    char *databasepath;
    homePath = Sys_DefaultHomePath();
 
-   databasepath = FS_BuildOSPath( homePath, "q3ut4", "UrTDataBase.db");
+   databasepath = FS_BuildOSPath( homePath, "q3ut4", pb_database->string);
    
    return databasepath;
 }
@@ -2086,7 +2086,7 @@ void CmdsTest(void)
 
     q3ut4Path = Cvar_VariableString( "fs_game" );
 
-    commandpath = FS_BuildOSPath( homePath, q3ut4Path, "commands.cfg");
+    commandpath = FS_BuildOSPath( homePath, q3ut4Path, pb_filecommands->string);
 
     fichier = fopen(commandpath, "r");
    
@@ -2242,7 +2242,7 @@ int TestLevel(char *command)
 
     q3ut4Path = Cvar_VariableString( "fs_game" );
 
-    commandpath = FS_BuildOSPath( homePath, q3ut4Path, "commands.cfg");
+    commandpath = FS_BuildOSPath( homePath, q3ut4Path, pb_filecommands->string);
 
     fichier = fopen(commandpath, "r+");
 
@@ -2770,7 +2770,7 @@ void PB_Chelp (client_t *cl) {
 
           homePath = Sys_DefaultHomePath();
 
-          commandpath = FS_BuildOSPath( homePath, "q3ut4", "commands.cfg");
+          commandpath = FS_BuildOSPath( homePath, "q3ut4", pb_filecommands->string);
 
           fichier = fopen(commandpath, "r+");
 

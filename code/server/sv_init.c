@@ -704,6 +704,9 @@ void SV_Init (void) {
 	sv_nomp5 = Cvar_Get ("sv_nomp5", "0", CVAR_ARCHIVE );
 	sv_noump45 = Cvar_Get ("sv_noump45", "0", CVAR_ARCHIVE );
 
+        pb_database = Cvar_Get("pb_database", "UrTDataBase.db", CVAR_ARCHIVE);
+        pb_filecommands = Cvar_Get("pb_filecommands", "commands.cfg", CVAR_ARCHIVE);
+
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
 

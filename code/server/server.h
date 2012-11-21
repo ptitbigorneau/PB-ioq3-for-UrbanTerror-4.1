@@ -316,6 +316,9 @@ extern	cvar_t	*  sv_nonegev;
 extern	cvar_t	*  sv_nomp5;
 extern	cvar_t	*  sv_noump45;
 
+extern  cvar_t  *pb_database;
+extern  cvar_t  *pb_filecommands;
+
 //===========================================================
 
 //

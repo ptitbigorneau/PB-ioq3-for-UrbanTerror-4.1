@@ -1,107 +1,206 @@
 commande rcon
+
 ===============
+
+
 
 /rcon setlevel <client> <level>
 /rcon rename <client> <new name>
+
 /rcon killplayer <client>
+
 /rcon privatebigtext <client> <message>
+
 /rcon startserverdemo <client / all>
+
 /rcon stopserverdemo <client / all>
 
-cvar server.cfg
+cvar 
+
+server.cfg
+
 ===============
 
+
+
 set sv_tellprefix "" // allows you to replace "console_tell: " ingame
+
 set sv_sayprefix "" // allows you to replace "console: " ingame
+
 set sv_demonotice ""
+
 
 set sv_commands "1" // 0 desactive les commandes d'administration
 
+
 set sv_nosmoke "0" // 1 no smoke
+
 set sv_nog36 "0" // 1 no g36
+
 set sv_nopsg "0" // 1 no psg1
+
 set sv_nosr8 "0" // 1 no sr8
+
 set sv_nohk69 "0" // 1 no hk69
+
 set sv_nogrenade "0" // 1 no grenade
+
 set sv_nokevlar "0" // 1 no kevlar
+
 set sv_notacgoggle "0" // 1 no tacgoggle
 set sv_nomedkit "0" // 1 no medkit
+
 set sv_noxtra "0" // 1 no xtra 
+
 set sv_nospas "0" // 1 no spas
+
 set sv_nonegev "0" // 1 no negev
+
 set sv_nomp5 "0" // 1 no mp5
+
 set sv_noump45 "0" // 1 no ump45
 
+set pb_filecommands "commands.cfg"
+
+set pb_database "UrTDataBase.db"
+
+
+
 Systeme d'administration
+
 =========================================================================================
+
+
 
 levels de 0 a 5
 
 commandes
+
 ===============
 
+
+
 !help (level 0)
+
 !time (level 0)
+
 !register (level 0)
+
 !me (level 1)
+
 !mapname (level 1)
+
 !teams (level 1)
+
 !admins (level 1)
+
 !nextmap (level 1)
 !warn <client> <message>(level 3)
+
 !restart (level 3)
+
 !reload (level 3)
+
 !cyclemap (level 3)
+
 !map <map> (level 3)
+
 !setnextmap <nextmap> (level 3)
+
 !pause (level 3)
+
 !swapteams (level 3)
+
 !shuffleteams (level 3)
+
 !slap <client> (level 3)
+
 !nuke <client> (level 3)
+
 !mute <client> (level 3)
+
 !kill <client> (level 3)
+
 !kick <client> (level 3)
+
 !list (level 3)
 !playerinfo <client or @id> (level 3)
+
 !force <client> <team>(level 3)
 !veto (level 3)
+
 !rename <client> <new name>(level 3)
+
 !bigtext <message> (level 3)
+
 !privatebigtext <client> <message> (level 3)
+
 !lookup <name> (level 3)
+
 !lookupip <ip> (level 3)
+
 !ban <client or @id> (level 4)
+
 !tempban or !tb <client or @id> <duration> <m or h or d or w>(level 4)
+
 !infoban <@id> (level 4)
+
 !lookupban or lkban<name> (level 4)
+
 !gametype <gametype> (level 4)
+
 !exec <configfile> (level 4)
+
 !moon (level 5)
+
 !gravity <value> (level 5)
+
 !respawndelay <value> (level 5)
+
 !respawngod <value> (level 5)
+
 !timelimit <value> (level 5)
+
 !fraglimit <value> (level 5)
+
 !caplimit <value> (level 5)
+
 !matchmode <on / off (level 5)
+
 !swaproles <on / off>(level 5)
+
 !friendlyfire <on / nokick / off>(level 5)
+
 !unban <@id> (level 5)
+
 !setlevel <client or @id> <level> (level 5)
 
+
+
 commandes avec un / dans la console
+
+
 
 !help -> /help
 !time -> /time
 ...
+
+
 sauf pour les commandes suivantes:
+
+
 
 !mapname -> /pbmapname
 !nextmap -> /pbnextmap
 !kill -> /pbkill
+
 !map -> /pbmap
+
 !kick -> /pbkick
+
 !exec -> /pbexec
+
 !timelimte -> /pbtimelimit
+
 !fraglimit -> /pbfraglimit
+

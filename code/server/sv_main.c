@@ -74,6 +74,9 @@ cvar_t	*  sv_nospas;
 cvar_t	*  sv_nonegev;
 cvar_t	*  sv_nomp5;
 cvar_t	*  sv_noump45;
+
+cvar_t  *pb_database;
+cvar_t  *pb_filecommands;
 /*
 =============================================================================
 
