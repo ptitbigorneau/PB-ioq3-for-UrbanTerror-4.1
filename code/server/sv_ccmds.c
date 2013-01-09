@@ -2586,7 +2586,7 @@ void PB_Cme (client_t *cl) {
                 }
 
               SV_SendServerCommand(cl, "chat \"^3IP: ^7%s ^3Guid: ^7%s\"", playerip, cguid);
-              SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mday, t->tm_mon, 1900 + t->tm_year, playerconnection);
+              SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mday, t->tm_mon +1, 1900 + t->tm_year, playerconnection);
   
        }
 
@@ -3232,7 +3232,7 @@ void PB_Cplayerinfo (client_t *cl, char *arg) {
              }
 
              SV_SendServerCommand(cl, "chat \"^3IP: ^7%s ^3Guid: ^7%s\"", playerip, playerguid);
-             SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mday, t->tm_mon, 1900 + t->tm_year, playerconnection);
+             SV_SendServerCommand(cl, "chat \"^3First Visit: ^7%02u/%02u/%02u ^3Connection ^7%s ^3times\"", t->tm_mday, t->tm_mon +1, 1900 + t->tm_year, playerconnection);
 
            }
           else 
