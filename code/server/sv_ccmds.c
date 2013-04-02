@@ -1468,10 +1468,10 @@ int databasefile ()
 {
    char *homePath;
    char *databasepath;
-   homePath = Sys_DefaultHomePath();
+   homePath = Cvar_VariableString( "fs_homePath" );
 
    databasepath = FS_BuildOSPath( homePath, "q3ut4", pb_database->string);
-   
+
    return databasepath;
 }
 
@@ -2082,7 +2082,7 @@ void CmdsTest(void)
     char *q3ut4Path;
     char *commandpath;
 
-    homePath = Sys_DefaultHomePath();
+    homePath = Cvar_VariableString( "fs_homePath" );
 
     q3ut4Path = Cvar_VariableString( "fs_game" );
 
@@ -2238,7 +2238,7 @@ int TestLevel(char *command)
     char *q3ut4Path;
     char *commandpath;
 
-    homePath = Sys_DefaultHomePath();
+    homePath = Cvar_VariableString( "fs_homePath" );
 
     q3ut4Path = Cvar_VariableString( "fs_game" );
 
@@ -2768,7 +2768,7 @@ void PB_Chelp (client_t *cl) {
           char *homePath;
           char *commandpath;
 
-          homePath = Sys_DefaultHomePath();
+          homePath = Cvar_VariableString( "fs_homePath" );
 
           commandpath = FS_BuildOSPath( homePath, "q3ut4", pb_filecommands->string);
 
@@ -5244,7 +5244,7 @@ void PB_Cnextmap (client_t *cl) {
                char firstmap[128];
                char *test = NULL;
 
-               homePath = Sys_DefaultHomePath();
+               homePath = Cvar_VariableString( "fs_homePath" );
   
                basePath = Cvar_VariableString( "fs_basepath" );
 
